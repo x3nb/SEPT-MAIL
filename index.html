@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="an email adventure — armor of God, delivered to your inbox. six cat companions, six pieces of armor, one house that the light found.">
+<title>ChimeraMail — an email adventure</title>
+<style>
+
+  :root {
+    --bg0: #0b0710;
+    --bg1: #120c1c;
+    --bg2: #1a1228;
+    --bg3: #251839;
+    --line: #36275200;
+    --line2: #3a2b5c;
+    --violet: #a78bfa;
+    --purple: #8b5cf6;
+    --deep: #4c1d95;
+    --teal: #2dd4bf;
+    --text: #e8e2f2;
+    --muted: #9b91b5;
+    --faint: #6f6690;
+    --gold: #d8b45f;
+    --danger: #fb7185;
+    --serif: Georgia, "Palatino Linotype", "Book Antiqua", serif;
+    --mono: ui-monospace, Menlo, Consolas, monospace;
+    --sans: system-ui, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    text-align: left;
+    min-height: 100vh;
+    background:
+      radial-gradient(1100px 560px at 72% -10%, rgba(124,58,237,.20), transparent 60%),
+      radial-gradient(900px 520px at 8% 112%, rgba(45,212,191,.10), transparent 62%),
+      radial-gradient(700px 700px at 50% 50%, rgba(76,29,149,.10), transparent 70%),
+      var(--bg0);
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(rgba(167,139,250,.055) 1px, transparent 1.6px);
+    background-size: 26px 26px;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at center, transparent 58%, rgba(4,2,8,.66));
+  }
+  .px { image-rendering: pixelated; image-rendering: crisp-edges; }
+  .dim { opacity: .22; filter: grayscale(.7); }
+  .screen { position: relative; z-index: 1; min-height: 100vh; }
+
+  button { font-family: inherit; cursor: pointer; }
+  input, select, textarea {
+    font-family: inherit; color: var(--text); background: rgba(12,7,20,.72);
+    border: 1px solid var(--line2); border-radius: 6px; padding: 9px 11px; font-size: 14px; outline: none; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 1px rgba(167,139,250,.35); }
+  ::placeholder { color: var(--faint); }
+
+  .primary {
+    background: linear-gradient(135deg, var(--deep), var(--purple));
+    color: #fff; border: 1px solid rgba(167,139,250,.5); border-radius: 8px;
+    padding: 11px 18px; font-size: 14px; letter-spacing: .4px; font-weight: 600;
+    box-shadow: 0 4px 18px rgba(124,58,237,.35); transition: .15s;
+  }
+  .primary:hover { box-shadow: 0 6px 24px rgba(167,139,250,.5); transform: translateY(-1px); }
+  .primary:disabled { opacity: .5; cursor: default; transform: none; }
+
+  #bootScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+  .boottext { color: var(--muted); font-family: var(--serif); font-style: italic; letter-spacing: 1px; }
+
+  #authScreen { display: flex; align-items: center; justify-content: center; padding: 30px 16px; }
+  #authDeco { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  #authDeco canvas { position: absolute; opacity: .14; animation: bob 9s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+
+  .authcard {
+    position: relative; z-index: 2; width: 100%; max-width: 420px;
+    background: linear-gradient(180deg, rgba(30,18,48,.85), rgba(16,10,28,.92));
+    border: 1px solid var(--line2); border-radius: 16px; padding: 30px 30px 26px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(124,58,237,.12), 0 0 90px rgba(76,29,149,.18) inset;
+  }
+  .brandbig { font-family: var(--serif); font-size: 34px; letter-spacing: 2px; color: var(--text);
+    display: flex; align-items: center; gap: 12px; text-shadow: 0 0 22px rgba(167,139,250,.55); }
+  .brandbig .orb { color: var(--teal); }
+  .brandbig .orb canvas { filter: drop-shadow(0 0 7px rgba(45,212,191,.55)); }
+  .tagline { color: var(--muted); font-family: var(--serif); font-style: italic; margin-top: 6px; font-size: 14px; }
+  .authverse { margin: 18px 0 4px; color: var(--gold); font-family: var(--serif); font-size: 13px; font-style: italic;
+    border-left: 2px solid var(--gold); padding-left: 10px; opacity: .85; }
+  .tabs { display: flex; gap: 8px; margin: 20px 0 16px; }
+  .tabbtn {
+    flex: 1; background: transparent; border: 1px solid var(--line2); color: var(--muted);
+    padding: 9px; border-radius: 8px; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .tabbtn.active { color: #fff; background: rgba(124,58,237,.25); border-color: var(--violet); }
+  #authScreen form { display: flex; flex-direction: column; gap: 12px; }
+  #authScreen label { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--muted); margin-bottom: -7px; }
+  .addrrow { display: flex; gap: 6px; align-items: center; }
+  .addrrow input { flex: 1; min-width: 0; }
+  .addrrow span { color: var(--faint); font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+  #authCats { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .catpick { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 70px; background: rgba(12,7,20,.6); border: 1px solid var(--line2); border-radius: 10px; padding: 8px 6px 6px; cursor: pointer; }
+  .catpick canvas { display: block; }
+  .catpick .catnm { font-family: var(--mono); font-size: 10px; letter-spacing: .5px; color: var(--faint); }
+  .catpick:hover { border-color: var(--violet); }
+  .catpick.sel { border-color: var(--teal); box-shadow: 0 0 14px rgba(45,212,191,.4); }
+  .catpick.sel .catnm { color: var(--teal); }
+  @media (max-width: 520px) {
+    .catpick { width: 62px; padding: 6px 4px 5px; }
+    .catpick .catnm { font-size: 9px; letter-spacing: 0; }
+  }
+  #authMsg { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 12px; text-align: center; opacity: 0; transition: .2s; }
+  #authMsg.show { opacity: 1; }
+
+  #appScreen { position: relative; z-index: 1; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+  #topbar {
+    display: flex; align-items: center; gap: 14px; padding: 10px 16px;
+    background: rgba(16,10,28,.85); border-bottom: 1px solid var(--line2);
+    backdrop-filter: blur(6px); flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: 22px; letter-spacing: 1.5px; }
+  .brand span.orb { color: var(--teal); text-shadow: 0 0 16px rgba(45,212,191,.7); }
+  .brand span.orb canvas { filter: drop-shadow(0 0 5px rgba(45,212,191,.55)); }
+  .greeting { flex: 1; min-width: 0; color: var(--muted); font-size: 13px; }
+  .greeting b { color: var(--text); font-weight: 600; }
+  .greeting .email { font-family: var(--mono); font-size: 11px; color: var(--faint); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .topactions { display: flex; gap: 8px; }
+  .topactions button {
+    background: rgba(124,58,237,.14); border: 1px solid var(--line2); color: var(--muted);
+    border-radius: 8px; padding: 8px 12px; font-size: 12px; letter-spacing: .5px;
+  }
+  .topactions button:hover { color: #fff; border-color: var(--violet); }
+  .topactions button.spin { animation: spin 0.5s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #topAvatar { display: flex; }
+
+  #faithWrap {
+    display: flex; align-items: center; gap: 12px; padding: 8px 16px;
+    background: rgba(12,7,20,.5); border-bottom: 1px solid var(--line2);
+  }
+  .faithlabel { font-size: 11px; letter-spacing: 2px; color: var(--muted); }
+  .faithbar { flex: 1; height: 12px; background: rgba(76,29,149,.3); border: 1px solid var(--line2); border-radius: 8px; overflow: hidden; }
+  #faithFill {
+    height: 100%; width: 50%; border-radius: 8px;
+    background: linear-gradient(90deg, var(--deep), var(--purple), var(--teal));
+    box-shadow: 0 0 14px rgba(45,212,191,.5);
+    transition: width .5s ease;
+  }
+  #faithNum { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 60px; text-align: right; }
+  #appScreen.lowfaith #faithFill { background: linear-gradient(90deg, #7f1d1d, var(--danger)); box-shadow: 0 0 14px rgba(251,113,133,.6); }
+  #appScreen.lowfaith .faithlabel, #appScreen.lowfaith #faithNum { color: var(--danger); }
+
+  #layout { flex: 1; display: flex; min-height: 0; }
+  #sidebar {
+    width: 190px; flex-shrink: 0; padding: 14px 10px; display: flex; flex-direction: column; gap: 4px;
+    border-right: 1px solid var(--line2); background: rgba(16,10,28,.6);
+  }
+  .navBtn {
+    display: flex; align-items: center; gap: 9px; text-align: left;
+    background: transparent; border: 1px solid transparent; color: var(--muted);
+    padding: 10px 12px; border-radius: 9px; font-size: 14px; letter-spacing: .4px;
+  }
+  .navBtn .glyph { color: var(--faint); font-size: 15px; }
+  .navBtn:hover { color: var(--text); background: rgba(124,58,237,.10); }
+  .navBtn.active { color: #fff; background: rgba(124,58,237,.18); border-color: rgba(167,139,250,.35); }
+  .navBtn.active .glyph { color: var(--teal); }
+  .count { margin-left: auto; background: var(--purple); color: #fff; border-radius: 9px; font-size: 11px; padding: 1px 7px; }
+  .count:empty { display: none; }
+  #questPanel { margin-top: 16px; border-top: 1px dashed var(--line2); padding-top: 14px; }
+  .questhead { font-size: 10px; letter-spacing: 2px; color: var(--faint); text-transform: uppercase; margin-bottom: 8px; }
+  .questbar { height: 8px; background: rgba(76,29,149,.3); border: 1px solid var(--line2); border-radius: 6px; overflow: hidden; margin: 6px 0 10px; }
+  #armorProgBar { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--teal)); width: 0%; transition: width .5s; }
+  .questrow { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .pillnum { color: var(--teal); font-family: var(--mono); }
+  .questrow.low .pillnum { color: var(--danger); }
+
+  #mailLayout { flex: 1; display: flex; min-width: 0; min-height: 0; }
+  #listPane { width: 340px; flex-shrink: 0; border-right: 1px solid var(--line2); display: flex; flex-direction: column; min-width: 0; }
+  #searchInput { margin: 10px 12px; width: calc(100% - 24px); }
+  #emailList { flex: 1; overflow-y: auto; padding: 0 8px 20px; }
+  .mrow {
+    display: flex; gap: 10px; align-items: flex-start; padding: 11px 10px; border-radius: 10px;
+    border-left: 3px solid transparent; cursor: pointer; margin-bottom: 3px; transition: background .12s;
+  }
+  .mrow:hover { background: rgba(124,58,237,.10); }
+  .mrow.active { background: rgba(124,58,237,.16); border-left-color: var(--teal); }
+  .mrow.unread .mfrom, .mrow.unread .msubj { color: #fff; font-weight: 600; }
+  .mrow.unread::before { content: ''; align-self: center; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--teal); box-shadow: 0 0 8px var(--teal); flex-shrink: 0; margin-top: 6px; }
+  .mav { flex-shrink: 0; margin-top: 2px; }
+  .mav canvas { border-radius: 5px; }
+  .mbody { min-width: 0; flex: 1; }
+  .mrowtop { display: flex; justify-content: space-between; gap: 8px; }
+  .mfrom { color: var(--text); font-size: 13.5px; }
+  .mtime { color: var(--faint); font-size: 11px; font-family: var(--mono); white-space: nowrap; }
+  .msubj { color: var(--muted); font-size: 12.5px; display: block; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .msnip { color: var(--faint); font-size: 11.5px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 1px; }
+  .tag { font-size: 9.5px; padding: 1px 6px; border-radius: 8px; border: 1px solid; margin-left: 4px; vertical-align: 1px; }
+  .tag.lock { color: var(--gold); border-color: var(--gold); }
+  .tag.dart { color: var(--danger); border-color: var(--danger); }
+  .tag.answered { color: var(--teal); border-color: var(--teal); }
+
+  #readPane { flex: 1; display: flex; flex-direction: column; min-width: 0; background: rgba(10,6,16,.45); }
+  .readerhead { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--line2); }
+  #backBtn { display: none; background: transparent; border: 1px solid var(--line2); color: var(--muted); border-radius: 8px; padding: 6px 10px; }
+  #reader { flex: 1; overflow-y: auto; padding: 20px 26px 40px; }
+  .readerempty { text-align: center; color: var(--muted); padding-top: 80px; }
+  .readerempty canvas { margin: 0 auto 16px; display: block; opacity: .5; }
+  .rhead { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line2); padding-bottom: 14px; }
+  .rav canvas { border-radius: 6px; box-shadow: 0 0 0 1px var(--line2); }
+  .rinfo { flex: 1; min-width: 0; }
+  .rfrom { font-family: var(--serif); font-size: 18px; font-weight: 700; }
+  .raddr { font-family: var(--mono); font-size: 11px; color: var(--faint); }
+  .rtime { font-family: var(--mono); font-size: 11px; color: var(--faint); }
+  .rtools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 0 4px; }
+  .toolbtn { background: rgba(124,58,237,.12); border: 1px solid var(--line2); color: var(--muted); border-radius: 8px; padding: 6px 12px; font-size: 12px; }
+  .toolbtn:hover { color: #fff; border-color: var(--violet); }
+  .toolbtn.word { color: var(--gold); border-color: rgba(216,180,95,.4); }
+  .quenchbadge { color: var(--teal); font-size: 12px; border: 1px solid rgba(45,212,191,.4); padding: 4px 10px; border-radius: 8px; }
+  .rsubj { font-family: var(--serif); font-size: 22px; margin: 16px 0 12px; letter-spacing: .3px; color: var(--text); }
+  .rbody {
+    font-family: var(--serif); font-size: 16px; line-height: 1.75; color: #ded6ea;
+    background: rgba(30,19,48,.5); border: 1px solid var(--line2); border-radius: 12px; padding: 20px 22px;
+  }
+  .rbody[data-kind="system"] { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .rbody.labmail { border-color: rgba(251,113,133,.4); background: rgba(80,10,20,.25); color: #f3c6cd; }
+  .rbody.yeshua { border-color: rgba(216,180,95,.45); background: rgba(60,45,15,.22); }
+  .youreply { margin-top: 14px; font-family: var(--serif); font-style: italic; color: var(--teal);
+    border: 1px dashed rgba(45,212,191,.35); border-radius: 10px; padding: 12px 16px; }
+  .yrtag { display: inline-block; font-family: var(--sans); font-style: normal; font-size: 10px; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--teal); margin-right: 8px; }
+  .replysec { margin-top: 18px; }
+  .replyhead { font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+  .choices { display: flex; flex-direction: column; gap: 9px; }
+  .choicebtn {
+    text-align: left; background: linear-gradient(180deg, rgba(50,30,80,.6), rgba(24,14,40,.7));
+    border: 1px solid var(--line2); color: var(--text); border-radius: 10px; padding: 13px 16px; font-size: 14px;
+    transition: .13s;
+  }
+  .choicebtn:hover:not(:disabled) { border-color: var(--violet); box-shadow: 0 0 0 1px rgba(167,139,250,.4), 0 4px 16px rgba(124,58,237,.25); transform: translateX(3px); }
+  .choicebtn:disabled { opacity: .45; cursor: default; }
+  .need { color: var(--faint); font-size: 11px; font-style: italic; }
+  .noteonly { color: var(--muted); font-family: var(--serif); font-style: italic; }
+  .dartnote { margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 13px; }
+  .dartnote.hit { color: var(--danger); border: 1px solid rgba(251,113,133,.4); background: rgba(127,29,29,.2); }
+  .dartnote.quench { color: var(--teal); border: 1px solid rgba(45,212,191,.4); background: rgba(15,118,110,.2); }
+  .dartnote:not(.hit):not(.quench) { color: var(--muted); border: 1px dashed var(--line2); }
+  .lockpanel { text-align: center; padding: 40px 20px; border: 1px solid var(--line2); border-radius: 12px; background: rgba(20,12,34,.6); }
+  .lockpanel canvas { margin: 0 auto 12px; display: block; }
+  .lockpanel .primary { margin-top: 16px; }
+
+  .emptystate { text-align: center; padding: 46px 16px; color: var(--muted); }
+  .emptytitle { font-family: var(--serif); font-size: 18px; color: var(--text); margin-bottom: 6px; }
+  .emptysub { font-size: 13px; color: var(--faint); }
+
+  #screenView { flex: 1; overflow-y: auto; padding: 22px 28px 60px; }
+  .viewhead h2 { font-family: var(--serif); font-size: 24px; letter-spacing: 1px; margin: 0 0 4px; }
+  .viewhead p { color: var(--muted); font-size: 13.5px; margin: 0 0 18px; max-width: 640px; }
+  .routegrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .routecard {
+    background: linear-gradient(180deg, rgba(32,20,52,.75), rgba(18,11,30,.85));
+    border: 1px solid var(--line2); border-radius: 14px; padding: 18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35); position: relative;
+  }
+  .routecard.done { border-color: rgba(45,212,191,.5); box-shadow: 0 0 24px rgba(45,212,191,.12); }
+  .routecard.locked { opacity: .55; }
+  .routeartwrap { height: 66px; display: flex; align-items: center; justify-content: center; }
+  .routeart { margin: 0 auto; }
+  .routetitle { font-family: var(--serif); font-size: 16px; margin: 6px 0 2px; color: var(--text); }
+  .routecat { font-size: 11.5px; color: var(--teal); letter-spacing: .5px; }
+  .routedesc { font-size: 12px; color: var(--muted); margin: 8px 0 12px; line-height: 1.5; }
+  .routebar { height: 7px; background: rgba(76,29,149,.3); border: 1px solid var(--line2); border-radius: 6px; overflow: hidden; }
+  .routebar span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--teal)); transition: width .4s; }
+  .routestatus { margin-top: 9px; font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--faint); }
+  .routestatus.ok { color: var(--teal); }
+  .ref { border-top: 1px dashed var(--line2); margin-top: 30px; padding-top: 18px; }
+  .refverses { font-family: var(--serif); font-style: italic; color: var(--gold) !important; }
+
+  .armoryrow { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; }
+  .playerpanel {
+    background: linear-gradient(180deg, rgba(32,20,52,.75), rgba(18,11,30,.85));
+    border: 1px solid var(--line2); border-radius: 14px; padding: 20px; flex: 1; min-width: 300px;
+  }
+  .playerpanel > canvas.px { display: block; margin: 0 auto 16px; }
+  .slotlist { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+  .armorslot {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: rgba(12,7,20,.6); border: 1px solid var(--line2); border-radius: 10px; padding: 6px; min-width: 0;
+  }
+  .armorslot canvas { display: block; }
+  .armorslot.owned { border-color: rgba(216,180,95,.45); }
+  .armorslot.eq { border-color: var(--teal); box-shadow: 0 0 14px rgba(45,212,191,.35); background: rgba(15,118,110,.15); }
+  .slotname { font-size: 10px; letter-spacing: .8px; text-transform: uppercase; color: var(--faint); }
+  .armorslot.eq .slotname { color: var(--teal); }
+  .armorslot.owned:not(.eq) .slotname { color: var(--gold); }
+  .invpanel {
+    background: linear-gradient(180deg, rgba(32,20,52,.75), rgba(18,11,30,.85));
+    border: 1px solid var(--line2); border-radius: 14px; padding: 20px; flex: 1; min-width: 300px;
+  }
+  .invhead { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .invgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 10px; }
+  .invcell {
+    position: relative; background: rgba(12,7,20,.6); border: 1px solid var(--line2); border-radius: 10px;
+    padding: 10px 6px 6px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer;
+  }
+  .invcell.has:hover { border-color: var(--violet); box-shadow: 0 0 12px rgba(167,139,250,.3); }
+  .invcell:not(.has) { opacity: .45; }
+  .invcell:not(.has) .invcnt { color: var(--faint); }
+  .invcell canvas { display: block; }
+  .invcnt { position: absolute; top: 5px; right: 7px; font-family: var(--mono); font-size: 11px; color: var(--teal); }
+  .invname { font-size: 10.5px; color: var(--muted); text-align: center; }
+  .invnote { margin-top: 14px; font-size: 11.5px; color: var(--faint); line-height: 1.6; }
+  .trophybanner {
+    margin-top: 16px; padding: 12px 16px; border: 1px solid rgba(216,180,95,.45); border-radius: 12px;
+    color: #f6e7bd; font-size: 13px; text-align: center;
+    background: linear-gradient(180deg, rgba(60,45,15,.28), rgba(24,16,6,.25));
+    box-shadow: 0 0 24px rgba(216,180,95,.12);
+  }
+  .trophybanner b { color: var(--gold); }
+
+  #toasts { position: fixed; top: 14px; right: 14px; z-index: 60; display: flex; flex-direction: column; gap: 8px; max-width: 320px; }
+  .toast {
+    background: linear-gradient(180deg, rgba(40,26,64,.95), rgba(20,12,34,.96));
+    border: 1px solid var(--line2); border-left: 3px solid var(--violet); border-radius: 10px;
+    padding: 11px 14px; font-size: 13px; color: var(--text); box-shadow: 0 10px 30px rgba(0,0,0,.5);
+    opacity: 0; transform: translateX(24px); transition: .3s;
+  }
+  .toast.show { opacity: 1; transform: translateX(0); }
+  .toast.armor { border-left-color: var(--gold); color: #f6e7bd; }
+  .toast.shield { border-left-color: var(--teal); }
+  .toast.danger { border-left-color: var(--danger); color: #ffd4da; }
+  .toast.ok { border-left-color: var(--teal); }
+  .topactions button.restartbtn { color: #e9c3cd; border-color: rgba(251,113,133,.35); }
+  .topactions button.restartbtn:hover { border-color: var(--danger); color: #ffd4da; }
+
+  #trophyModal {
+    position: fixed; inset: 0; z-index: 70; background: rgba(5,2,10,.82);
+    display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px);
+  }
+  #trophyModal.show { display: flex; animation: fadein .4s; }
+  @keyframes fadein { from { opacity: 0; } }
+  .trophycard {
+    text-align: center; max-width: 440px; width: 100%;
+    background: linear-gradient(180deg, rgba(46,26,70,.97), rgba(18,11,30,.98));
+    border: 1px solid rgba(216,180,95,.55); border-radius: 18px; padding: 34px 26px 26px;
+    box-shadow: 0 0 60px rgba(216,180,95,.25), 0 24px 70px rgba(0,0,0,.65);
+  }
+  #trophySprite canvas {
+    margin: 0 auto 6px; display: block;
+    filter: drop-shadow(0 0 10px rgba(216,180,95,.55));
+    animation: trophypulse 2.2s ease-in-out infinite;
+  }
+  @keyframes trophypulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+  .trophytitle { font-family: var(--serif); font-size: 25px; letter-spacing: 1px; color: var(--gold); margin-top: 10px; text-shadow: 0 0 18px rgba(216,180,95,.5); }
+  .trophysub { color: var(--muted); font-size: 14px; line-height: 1.6; margin-top: 8px; }
+  .trophyverse { font-family: var(--serif); font-style: italic; color: var(--gold); opacity: .85; font-size: 13px; margin: 16px 0 24px; line-height: 1.6; }
+  #trophyClose { white-space: nowrap; }
+
+  #composeModal {
+    position: fixed; inset: 0; z-index: 50; background: rgba(5,2,10,.72); display: none;
+    align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(3px);
+  }
+  #composeModal.show { display: flex; }
+  .composecard {
+    width: 100%; max-width: 560px; background: linear-gradient(180deg, rgba(32,20,52,.97), rgba(16,10,28,.98));
+    border: 1px solid var(--line2); border-radius: 14px; padding: 22px;
+    box-shadow: 0 24px 70px rgba(0,0,0,.6);
+  }
+  .composecard h3 { font-family: var(--serif); margin: 0 0 16px; letter-spacing: 1px; }
+  .composecard .field { margin-bottom: 12px; }
+  .composecard label { display: block; font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+  #cBody { min-height: 160px; resize: vertical; }
+  .composefoot { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+
+  @media (max-width: 900px) {
+    #layout { flex-direction: column; }
+    #sidebar { width: 100%; flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--line2); padding: 8px; }
+    .navBtn { flex-shrink: 0; }
+    #questPanel { display: none; }
+    #mailLayout { flex-direction: column; }
+    #listPane { width: 100%; border-right: none; flex: 1 1 auto; min-height: 0; }
+    #readPane { display: none; }
+    #appScreen.reading #readPane {
+      display: flex; position: fixed; inset: 0; z-index: 40; background: var(--bg1);
+    }
+    #backBtn { display: block; }
+    #reader { padding: 16px 16px 40px; }
+    #screenView { padding: 18px 16px 60px; }
+    .slotlist { gap: 4px; }
+    .armorslot { padding: 4px 2px; }
+    .armorslot .slotname { display: none; }
+    .armorslot::after { content: ''; width: 10px; height: 4px; border-radius: 2px; background: var(--line2); }
+    .armorslot.eq::after { background: var(--teal); }
+    .armorslot.owned:not(.eq)::after { background: var(--gold); }
+  }
+
+</style>
+</head>
+<body>
+
+<div id="bootScreen" class="screen">
+  <div class="boottext">opening the mailbox…</div>
+</div>
+
+<div id="authScreen" class="screen" hidden>
+  <div id="authDeco"></div>
+  <div class="authcard">
+    <div class="brandbig"><span class="orb" id="brandMarkAuth"></span> ChimeraMail</div>
+    <div class="tagline">an email adventure — armor of God, delivered to your inbox</div>
+    <div class="authverse">“Put on the whole armor of God, that you may be able to stand against the schemes of the devil.”</div>
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="join" type="button">join</button>
+      <button class="tabbtn" data-tab="login" type="button">login</button>
+    </div>
+    <form id="joinForm">
+      <label>your name</label>
+      <input id="jName" autocomplete="off">
+      <label>mailbox address</label>
+      <div class="addrrow">
+        <input id="jHandle" autocomplete="off" placeholder="3–20 letters, numbers, _ or -">
+        <span>@chimeramail.cat</span>
+      </div>
+      <label>password</label>
+      <input id="jPass" type="password" autocomplete="new-password">
+      <label>choose your sigil</label>
+      <div id="authCats"></div>
+      <input type="hidden" id="jCat" value="star">
+      <button id="joinBtn" class="primary" type="button">open my mailbox</button>
+    </form>
+    <form id="loginForm" hidden>
+      <label>address</label>
+      <div class="addrrow">
+        <input id="lHandle" autocomplete="off">
+        <span>@chimeramail.cat</span>
+      </div>
+      <label>password</label>
+      <input id="lPass" type="password" autocomplete="current-password">
+      <button id="loginBtn" class="primary" type="button">enter</button>
+    </form>
+    <div id="authMsg"></div>
+  </div>
+</div>
+
+<div id="appScreen" hidden>
+  <header id="topbar">
+    <div class="brand"><span class="orb" id="brandMarkBar"></span> ChimeraMail</div>
+    <div id="topAvatar"></div>
+    <div class="greeting">good evening, <b id="greetingName">…</b><br><span class="email" id="userEmail">…</span></div>
+    <div class="topactions">
+      <button id="checkMailBtn" type="button">check mail</button>
+      <button id="sndBtn" type="button">sound on</button>
+      <button id="logoutBtn" type="button">log out</button>
+      <button id="restartBtn" class="restartbtn" type="button">restart</button>
+    </div>
+  </header>
+
+  <div id="faithWrap">
+    <span class="faithlabel">GRACE</span>
+    <div class="faithbar"><div id="faithFill"></div></div>
+    <span id="faithNum"></span>
+  </div>
+
+  <main id="layout">
+    <nav id="sidebar">
+      <button class="navBtn active" data-view="inbox" type="button"><span class="glyph">✉</span> inbox <span class="count" id="inboxCount"></span></button>
+      <button class="navBtn" data-view="hidden" type="button"><span class="glyph">❖</span> hidden <span class="count" id="hiddenCount"></span></button>
+      <button class="navBtn" data-view="sent" type="button"><span class="glyph">➤</span> sent</button>
+      <button class="navBtn" data-view="routes" type="button"><span class="glyph">✧</span> routes</button>
+      <button class="navBtn" data-view="armory" type="button"><span class="glyph">◈</span> armory</button>
+      <button class="navBtn" id="composeBtn" type="button"><span class="glyph">✎</span> compose</button>
+      <div id="questPanel">
+        <div class="questhead">the armor</div>
+        <div id="armorProg" class="questrow"></div>
+        <div class="questbar"><span id="armorProgBar"></span></div>
+        <div id="sideFaith" class="questrow"></div>
+        <div id="trophyRow" class="questrow" hidden></div>
+      </div>
+    </nav>
+
+    <div id="mailLayout">
+      <section id="listPane">
+        <input id="searchInput" placeholder="search the archive…">
+        <div id="emailList"></div>
+      </section>
+      <section id="readPane">
+        <div class="readerhead"><button id="backBtn" type="button">✕ back</button></div>
+        <div id="reader"></div>
+      </section>
+    </div>
+
+    <div id="screenView" hidden>
+      <div id="routesView"></div>
+      <div id="armoryView"></div>
+    </div>
+  </main>
+</div>
+
+<div id="composeModal">
+  <div class="composecard">
+    <h3>✎ new message</h3>
+    <div class="field">
+      <label>to</label>
+      <select id="cTo"></select>
+    </div>
+    <div class="field">
+      <label>subject</label>
+      <input id="cSubj" placeholder="a thought, a prayer, a question…">
+    </div>
+    <div class="field">
+      <label>message</label>
+      <textarea id="cBody" placeholder="write to the cats — or to the lab, if you dare."></textarea>
+    </div>
+    <div class="composefoot">
+      <button id="composeCancel" type="button" class="toolbtn">cancel</button>
+      <button id="composeSend" type="button" class="primary">send</button>
+    </div>
+  </div>
+</div>
+
+<div id="trophyModal">
+  <div class="trophycard">
+    <div id="trophySprite"></div>
+    <div class="trophytitle">the trophy of completion</div>
+    <div class="trophysub">the whole armor of god — worn to the end. you stood, and the morning came.</div>
+    <div class="trophyverse">“i have fought the good fight, i have finished the race, i have kept the faith.” — 2 timothy 4:7</div>
+    <button id="trophyClose" class="primary" type="button">keep wearing it</button>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+
+<script>
+/* ============================================================
+   ChimeraMail — standalone build (from the Perchance generator)
+   Engine dependencies replaced:
+   - pjs lists/constants  -> plain JS below
+   - kv-plugin (IndexedDB) -> localStorage shim (same get/set/delete API)
+   - root.pickVerse()/VERSE_OF_THE_DAY -> provided below
+   ============================================================ */
+window.root = (function () {
+  "use strict";
+  const scripture = [
+    "Ephesians 6:11 — Put on the whole armor of God, that you may be able to stand against the schemes of the devil.",
+    "Ephesians 6:16 — Above all, taking the shield of faith, wherewith ye shall be able to quench all the fiery darts of the wicked.",
+    "John 8:32 — And you will know the truth, and the truth will set you free.",
+    "Romans 8:1 — There is therefore now no condemnation for those who are in Christ Jesus.",
+    "Jeremiah 29:11 — For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.",
+    "Psalm 23:4 — Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me.",
+    "Isaiah 41:10 — Fear not, for I am with you; be not dismayed, for I am your God. I will strengthen you, I will help you.",
+    "Matthew 11:28 — Come to me, all who labor and are heavy laden, and I will give you rest.",
+    "Hebrews 11:1 — Now faith is the assurance of things hoped for, the conviction of things not seen.",
+    "Psalm 34:18 — The Lord is near to the brokenhearted and saves the crushed in spirit.",
+    "Proverbs 3:5 — Trust in the Lord with all your heart, and do not lean on your own understanding.",
+    "Psalm 46:1 — God is our refuge and strength, a very present help in trouble."
+  ];
+  const pickVerse = function () {
+    return scripture[Math.floor(Math.random() * scripture.length)];
+  };
+  const folder = function (name) {
+    const KEY = 'cmkv.' + name;
+    const read = function () {
+      try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; }
+    };
+    const write = function (obj) {
+      try { localStorage.setItem(KEY, JSON.stringify(obj)); } catch (e) {}
+    };
+    return {
+      get: async function (k) { const o = read(); return (k in o) ? o[k] : null; },
+      set: async function (k, v) { const o = read(); o[k] = v; write(o); },
+      delete: async function (k) { const o = read(); delete o[k]; write(o); },
+      entries: async function () { return Object.entries(read()); }
+    };
+  };
+  return {
+    SERVICE_NAME: "ChimeraMail",
+    SERVICE_DOMAIN: "chimeramail.cat",
+    SERVICE_TAGLINE: "an email adventure — armor of God, delivered to your inbox",
+    SERVICE_SIGNOFF: "the Chimera Cats",
+    VERSE_OF_THE_DAY: "Ephesians 6:11 — Put on the whole armor of God, that you may be able to stand against the schemes of the devil.",
+    FAITH_MAX: 100,
+    DART_DAMAGE: 25,
+    pickVerse: pickVerse,
+    kv: { cmAccounts: folder('cmAccounts'), cmPlayers: folder('cmPlayers') }
+  };
+})();
+</script>
+<script>
+window.PIX = (function () {
+  const PAL = {
+    'k': '#150f1c', 'K': '#000000', 'w': '#f4edf9', 'W': '#ffffff',
+    'g': '#8b84a0', 'G': '#4a4460', 'd': '#241a33', 'D': '#171022',
+    'p': '#a78bfa', 'P': '#7c3aed', 'v': '#4c1d95', 'V': '#6d28d9',
+    't': '#2dd4bf', 'T': '#0f766e', 'o': '#fbbf24', 'O': '#f97316',
+    'r': '#f87171', 'R': '#b91c1c', 'b': '#78350f', 'n': '#d4a373',
+    'e': '#5eead4', 's': '#cbd5e1', 'S': '#94a3b8', 'c': '#fde68a',
+    'u': '#93c5fd', 'y': '#fef3c7', 'C': '#e9d8f5', 'm': '#a21caf',
+    'a': '#16a34a', 'i': '#818cf8', 'I': '#4f46e5', 'x': '#f9a8d4', 'X': '#ec4899'
+  };
+
+  const sprites = {
+    hans: [
+      "Kw............wK",
+      "KKw.........wKK.",
+      "KKKw.......wKKK.",
+      ".KKKw.....wKKK..",
+      ".KKwwwwwwwwwKK..",
+      ".wwwKKwwwKKwwww.",
+      "wwwwKKwwwKKwwwww",
+      "wwwwKKKKKKKKwwww",
+      "wwuuuKKKKKooowwd",
+      "wwuuuKKKKKooowwd",
+      "wuuuuKKKKKuuuwwd",
+      "wuuuuwwwwwuuuwwd",
+      ".wuuuwwwwwuuuww.",
+      ".wwwwwwwwwwwwww.",
+      "..ddwwwwwwwwdd..",
+      "...dddddddddd..."
+    ],
+    chari: [
+      "dd............dd",
+      "ddd.........ddd.",
+      "dddd.......dddd.",
+      ".dddd.....dddd..",
+      ".dddddddddddd...",
+      ".dwwwwwwwwwwwwd.",
+      "dwwppppppppppwwd",
+      "dwwppppppppppwwd",
+      "dwvvvpppppvvvwwd",
+      "dwvvvpppppvvvwwd",
+      "dwwppppppppppwwd",
+      ".dwwwwwwwwwwwwd.",
+      ".dwXwwwwwwwwXwd.",
+      ".dwXwwwwwwwwXwd.",
+      "..ddwwwwwwwwdd..",
+      "...dddddddddd..."
+    ],
+    star: [
+      "kk............kk",
+      "kkk.........kkk.",
+      "kkkk.......kkkk.",
+      ".kkkk.....kkkk..",
+      ".kkkkkkkkkkkk...",
+      ".dkkkkkkkkkkkkd.",
+      "dkkkPPPPPPPPkkkd",
+      "dkkkPPPPPPPPkkkd",
+      "dkkkoooPPPoookkd",
+      "dkkkoooPPPoookkd",
+      "dkkkPPPPPPPPkkkd",
+      ".dkkkkkkkkkkkkd.",
+      ".dwwwwwwwwwwwwd.",
+      ".dtwwwwwwwwwwtd.",
+      "..ddwwwwwwwwdd..",
+      "...dddddddddd..."
+    ],
+    milo: [
+      "KK............KK",
+      "KKK.........KKK.",
+      "KKKK.......KKKK.",
+      ".KKKK.....KKKK..",
+      ".KKKKKKKKKKKK...",
+      ".dKKKKKKKKKKKKd.",
+      "dKKKaaaaaaKKKKKd",
+      "dKKKaaaaaaKKKKKd",
+      "dKKeeaaaaeeKKKKd",
+      "dKKeeaaaaeeKKKKd",
+      "dKKKaaaaaaKKKKKd",
+      ".dKKKKKKKKKKKKd.",
+      ".dwwwwwwwwwwwwd.",
+      ".dewwwwwwwwwwed.",
+      "..ddwwwwwwwwdd..",
+      "...dddddddddd..."
+    ],
+    pearl: [
+      "nn............nn",
+      "nnn.........nnn.",
+      "nnnn.......nnnn.",
+      ".nnnn.....nnnn..",
+      ".nnnwwwwwwwnnn..",
+      ".dwwwwwwwwwwwwd.",
+      "dwwxxxxxxxxxxwwd",
+      "dwwxxxxxxxxxxwwd",
+      "dwwvvvxxxxxvvwwd",
+      "dwwvvvxxxxxvvwwd",
+      "dwwxxxxxxxxxxwwd",
+      ".dwwwwwwwwwwwwd.",
+      ".dwwwwwwwwwwwwd.",
+      ".dwwwwwwwwwwwwd.",
+      "..ddwwwwwwwwdd..",
+      "...dddddddddd..."
+    ],
+    slay: [
+      "gg............gg",
+      "ggg.........ggg.",
+      "gggg.......gggg.",
+      ".gggg.....gggg..",
+      ".gggwwwwwwgggg..",
+      ".dggggggggggggd.",
+      "dggiiiiiiiiigggd",
+      "dggiiiiiiiiigggd",
+      "dggIIiiiiiIIgggd",
+      "dggIIiiiiiIIgggd",
+      "dggiiiiiiiiigggd",
+      ".dggggggggggggd.",
+      ".dggwwtttwwwggd.",
+      ".dggwwwwwwwwggd.",
+      "..ddggggggggdd..",
+      "...dddddddddd..."
+    ],
+    sylvestre: [
+      "GG............GG",
+      "GGG.........GGG.",
+      "GGGG.......GGGG.",
+      ".GGGG.....GGGG..",
+      ".GGGwwwwwwGGGG..",
+      ".dGGGGGGGGGGGGd.",
+      "dGGiiiiiiiiigggd",
+      "dGGiiiiiiiiigggd",
+      "dGGooiiiiiooGGGd",
+      "dGGooiiiiiooGGGd",
+      "dGGiiiiiiiiigggd",
+      ".dGGwwwwwwwwGGd.",
+      ".dGGwwwwwwwwGGd.",
+      ".dGGGGGGGGGGGGd.",
+      "..ddGGGGGGGGdd..",
+      "...dddddddddd..."
+    ],
+    yeshua: [
+      ".......vv.......",
+      ".......vv.......",
+      ".......vv.......",
+      "....v..vv..v....",
+      ".....v.vv.v.....",
+      "......vvv.......",
+      "vvvvvvvvvvvvvvvv",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "vvvvvvvvvvvvvvvv",
+      "......vvv.......",
+      ".....v.vv.v.....",
+      "....v..vv..v....",
+      ".......vv.......",
+      ".......vv.......",
+      ".......vv......."
+    ],
+    system: [
+      "................",
+      "..gg...gg...gg..",
+      ".ggg..ggg..ggg..",
+      "..gg...gg...gg..",
+      "................",
+      "................",
+      "...ggggggggg....",
+      "..ggggggggggg...",
+      "..ggggggggggg...",
+      "...ggggggggg....",
+      "....ggggggg.....",
+      ".....ggggg......",
+      "......ggg.......",
+      "................",
+      "................",
+      "................"
+    ],
+    lab: [
+      "................",
+      "......rrrr......",
+      "....rrrrrrrr....",
+      "...rrrRRRRrrr...",
+      "..rrRRwwwwRRrr..",
+      "..rrRwwwwwwRrr..",
+      ".rrRwwRRRRwwRrr.",
+      ".rrRwwRRRRwwRrr.",
+      "..rrRwwwwwwRrr..",
+      "..rrRRwwwwRRrr..",
+      "...rrrRRRRrrr...",
+      "....rrrrrrrr....",
+      "......rrrr......",
+      "................",
+      "................",
+      "................"
+    ],
+    belt: [
+      "................",
+      "................",
+      "................",
+      "................",
+      "..oooooooooooo..",
+      ".oooooooooooooo.",
+      ".oKKKKKKKKKKKKo.",
+      ".oKooKKooKKooKo.",
+      ".oKKKKKKKKKKKKo.",
+      ".oKKooooooKKKKo.",
+      ".oooooooooooooo.",
+      "..oooooooooooo..",
+      "................",
+      "................",
+      "................",
+      "................"
+    ],
+    breastplate: [
+      "................",
+      "................",
+      ".....oooooo.....",
+      "....oOOOOOOo....",
+      "...oOOooooOOo...",
+      "...oOo....oOo...",
+      "...oOo....oOo...",
+      "...oOOooooOOo...",
+      "....oOOOOOOo....",
+      ".....oooooo.....",
+      ".....oo..oo.....",
+      "....ooo..ooo....",
+      "...ooo....ooo...",
+      "...oo......oo...",
+      "................",
+      "................"
+    ],
+    boots: [
+      "................",
+      "................",
+      "................",
+      "................",
+      "................",
+      "................",
+      "................",
+      ".....oo...oo....",
+      "....oooo.oooo...",
+      "...ooooooooooo..",
+      "..oooooo.ooooo..",
+      "..oooooo.ooooo..",
+      "..oooo...oooo...",
+      "...ooo...ooo....",
+      "................",
+      "................"
+    ],
+    shield: [
+      "................",
+      ".....oooooo.....",
+      "....oOOOOOOo....",
+      "...oOOooooOOo...",
+      "...oOOooooOOo...",
+      "..oOOooooooOOo..",
+      "..oOooooooooOo..",
+      "..oOottttttOo...",
+      "..oOottttttOo...",
+      "..oOOooooooOOo..",
+      "...oOOooooOOo...",
+      "...oOOooooOOo...",
+      "....oOOOOOOo....",
+      ".....oooooo.....",
+      "......oooo......",
+      "................"
+    ],
+    helmet: [
+      "................",
+      ".....oooooo.....",
+      "....oOOOOOOo....",
+      "...oOOOOOOOOo...",
+      "...oOooooooOo...",
+      "...oOo....oOo...",
+      "...oOo.oo.oOo...",
+      "...oOo.oo.oOo...",
+      "....oOooooOo....",
+      ".....oooooo.....",
+      "......o..o......",
+      "......o..o......",
+      ".....oooooo.....",
+      "................",
+      "................",
+      "................"
+    ],
+    sword: [
+      "................",
+      ".......oo.......",
+      ".......oo.......",
+      "......oooo......",
+      ".....oosso......",
+      "....oosssso.....",
+      "...oosssssso....",
+      "...osssssssso...",
+      "....osssssso....",
+      ".....osssso.....",
+      "......osso......",
+      ".......oo.......",
+      "......oooo......",
+      ".....o..o..o....",
+      "....o.......o...",
+      "................"
+    ],
+    treat: [
+      "................",
+      "................",
+      "................",
+      "..ooooo...ooooo.",
+      ".ooooooo.ooooooo",
+      ".ooooooooooooooo",
+      "..ooooooooooooo.",
+      "...ooooooooooo..",
+      "....ooooooooo...",
+      ".....ooooooo....",
+      "......ooooo.....",
+      ".......ooo......",
+      "................",
+      "................",
+      "................",
+      "................"
+    ],
+    key: [
+      "................",
+      "................",
+      "................",
+      "................",
+      "....oooooo......",
+      "...o......o.....",
+      "...o......o.....",
+      "....oooooo......",
+      "......oo........",
+      "......oo........",
+      "......oo........",
+      "......oo........",
+      "......oo........",
+      ".....o..........",
+      "....o...........",
+      "................"
+    ],
+    candle: [
+      "................",
+      "................",
+      ".......OO.......",
+      "......OOOO......",
+      ".......OO.......",
+      ".......oo.......",
+      ".......oo.......",
+      ".......oo.......",
+      ".......oo.......",
+      ".......oo.......",
+      ".......oo.......",
+      "......oooo......",
+      "......oooo......",
+      ".....oooooo.....",
+      "................",
+      "................"
+    ],
+    scroll: [
+      "................",
+      "................",
+      "....oooooooo....",
+      "...oooooooooo...",
+      "...ooo....ooo...",
+      "...oo.cccc.oo...",
+      "...oo.cccc.oo...",
+      "...oo.cccc.oo...",
+      "...oo.cccc.oo...",
+      "...oo.cccc.oo...",
+      "...ooo....ooo...",
+      "...oooooooooo...",
+      "....oooooooo....",
+      "................",
+      "................",
+      "................"
+    ],
+    dart: [
+      "................",
+      ".......oo.......",
+      "......o..o......",
+      ".....o....o.....",
+      "....o..oo..o....",
+      "....o..oo..o....",
+      ".....o....o.....",
+      "......o..o......",
+      ".......oo.......",
+      ".......oo.......",
+      ".......oo.......",
+      ".......oo.......",
+      "......oooo......",
+      ".....oo..oo.....",
+      "................",
+      "................"
+    ],
+    trophy: [
+      "................",
+      "......c..c......",
+      ".......cc.......",
+      ".....oooooo.....",
+      "....oOOOOOOo....",
+      "....oOOttOOo....",
+      "....oOOttOOo....",
+      "....oOOOOOOo....",
+      ".....oOOOOo.....",
+      "......oOOo......",
+      "....oooooooo....",
+      "...oooooooooo...",
+      "..oo.oooooo.oo..",
+      "...oooooooooo...",
+      "....oooooooo....",
+      ".....oooooo....."
+    ],
+    paw: [
+      "................",
+      "..tt...tt...tt..",
+      ".ttt..ttt..ttt..",
+      "..tt...tt...tt..",
+      "................",
+      "................",
+      "....tttttttt....",
+      "...tttttttttt...",
+      "..tttttttttttt..",
+      "..tttttttttttt..",
+      "..tttttttttttt..",
+      "...tttttttttt...",
+      "....tttttttt....",
+      "................",
+      "................",
+      "................"
+    ]
+  };
+
+  function draw(ctx, name, x, y, scale, alpha) {
+    const grid = sprites[name];
+    if (!grid) return;
+    if (alpha != null) ctx.globalAlpha = alpha;
+    for (let r = 0; r < grid.length; r++) {
+      const row = grid[r];
+      for (let c = 0; c < row.length; c++) {
+        const col = PAL[row[c]];
+        if (!col) continue;
+        ctx.fillStyle = col;
+        ctx.fillRect(x + c * scale, y + r * scale, scale, scale);
+      }
+    }
+    if (alpha != null) ctx.globalAlpha = 1;
+  }
+
+  function canvas(name, scale) {
+    const grid = sprites[name];
+    if (!grid) return null;
+    const h = grid.length, w = grid[0].length;
+    const cv = document.createElement('canvas');
+    cv.width = w * scale; cv.height = h * scale;
+    const ctx = cv.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    draw(ctx, name, 0, 0, scale);
+    return cv;
+  }
+
+  return { PAL, sprites, draw, canvas };
+})();
+
+</script>
+<script>
+window.CHIMERA = {
+  senders: {
+    system: { name: 'chimera mail system', addr: 'system@chimeramail.cat', sprite: 'system', color: '#8b84a0' },
+    star: { name: 'star', addr: 'star@chimeramail.cat', sprite: 'star', color: '#fbbf24' },
+    hans: { name: 'hans', addr: 'hans@chimeramail.cat', sprite: 'hans', color: '#94a3b8' },
+    chari: { name: 'chari', addr: 'chari@chimeramail.cat', sprite: 'chari', color: '#a78bfa' },
+    milo: { name: 'milo', addr: 'milo@chimeramail.cat', sprite: 'milo', color: '#5eead4' },
+    pearl: { name: 'pearl', addr: 'pearl@chimeramail.cat', sprite: 'pearl', color: '#f9a8d4' },
+    slay: { name: 'slay', addr: 'slay@chimeramail.cat', sprite: 'slay', color: '#818cf8' },
+    sylvestre: { name: 'sylvestre', addr: 'sylvestre@chimeramail.cat', sprite: 'sylvestre', color: '#6366f1' },
+    yeshua: { name: 'Yeshua', addr: 'yeshua@chimeramail.cat', sprite: 'yeshua', color: '#fde68a' },
+    lab: { name: 'chimera labs', addr: 'retrieval@chimeralabs.net', sprite: 'lab', color: '#f87171' }
+  },
+
+  cats: ['hans', 'chari', 'star', 'milo', 'pearl', 'slay', 'sylvestre'],
+
+  armor: {
+    belt: { id: 'belt', name: 'Belt of Truth', ref: 'Ephesians 6:14', sprite: 'belt', color: '#fbbf24', desc: 'Gird yourself in truth before anything else. With it, lies have no hold — truth keeps every other piece in place.' },
+    breastplate: { id: 'breastplate', name: 'Breastplate of Righteousness', ref: 'Ephesians 6:14', sprite: 'breastplate', color: '#7c3aed', desc: 'Covers the heart. You do not earn it — you are made right. Shame’s needles cannot reach a guarded heart.' },
+    boots: { id: 'boots', name: 'Shoes of the Gospel of Peace', ref: 'Ephesians 6:15', sprite: 'boots', color: '#fbbf24', desc: 'For walking toward people, not away. Peace stands in the fight without becoming the enemy.' },
+    shield: { id: 'shield', name: 'Shield of Faith', ref: 'Ephesians 6:16', sprite: 'shield', color: '#2dd4bf', desc: 'Quenches every fiery dart. The darts still fly; the shield decides whether they land. Equip it to deflect attack emails.' },
+    helmet: { id: 'helmet', name: 'Helmet of Salvation', ref: 'Ephesians 6:17', sprite: 'helmet', color: '#a78bfa', desc: 'Guards the head — the thoughts, the what-ifs. You are sealed. No one can unsave you. Cuts dart damage in half.' },
+    sword: { id: 'sword', name: 'Sword of the Spirit', ref: 'Ephesians 6:17', sprite: 'sword', color: '#fde68a', desc: 'The word of God. Equip it to Speak the Word over any mail — it restores grace and answers accusations.' }
+  },
+
+  routes: [
+    { id: 'belt', title: 'Route of Truth', cat: 'hans', armor: 'belt', desc: 'Hans caught the lab rewriting its own records. Walk his route and learn to see lies for what they are.' },
+    { id: 'breastplate', title: 'Route of the Heart', cat: 'chari', armor: 'breastplate', desc: 'They called Chari a glitch. Walk her route and unlearn the names they gave her.' },
+    { id: 'peace', title: 'Route of Peace', cat: 'star', armor: 'boots', desc: 'Star keeps the door open — even for the ones who will never find it. Walk her route and learn the road that is lighter to carry.' },
+    { id: 'shield', title: 'Route of the Darts', cat: 'yeshua', armor: 'shield', desc: 'The lab’s fiery darts are coming. Learn to hold the shield that quenches them.' },
+    { id: 'helmet', title: 'Route of Hope', cat: 'yeshua', armor: 'helmet', desc: 'Fear strikes the head first. Guard your thoughts with the promise that cannot be broken.' },
+    { id: 'sword', title: 'Route of the Word', cat: 'yeshua', armor: 'sword', desc: 'A sword trains with its wielder. Complete the verses and take up the word of God.' }
+  ],
+
+  items: {
+    treat: { name: 'Cat Treat', sprite: 'treat', desc: 'A real, unspiked treat. Send one to a cat and they will open up to you.' },
+    key: { name: 'Lab Key', sprite: 'key', desc: 'Chari found this in her food dish. It opens the locked archive file.' },
+    scroll: { name: 'Verse Scroll', sprite: 'scroll', desc: 'A written word. Use it to restore 8 grace and receive a verse.' },
+    candle: { name: 'Hearth Candle', sprite: 'candle', desc: 'A small flame against the dark. Use it to restore 5 grace.' },
+    dart: { name: 'Quenched Dart', sprite: 'dart', desc: 'A fiery dart that fell at your feet. A trophy of every accusation that failed.' },
+    trophy: { name: 'Trophy of Completion', sprite: 'trophy', desc: 'The whole armor, worn to the end. You stood — and the morning came.' }
+  },
+
+  autoReplies: {
+    star: [
+      '“oh, love, a real letter — and not a retrieval notice. you have no idea how that warms the café.\n\ni’ll keep it by the window where the light hits it. write back whenever the door is open — which is always.”\n\n— star',
+      '“thank you for writing. most people only ever send numbers and signatures. words that mean something are worth more than treats.\n\ni’ll read it twice — once now, once at the violet hour.”\n\n— star'
+    ],
+    hans: [
+      '“a letter. how refreshingly unfiled.\n\nrest assured it will be archived under ‘correspondence, meaningful’ and treated with the dignity it deserves. i do hope you will write again — the fourth shelf bites, but the third one does not.”\n\n— hans',
+      '“i have read your letter twice, which for me is the highest form of flattery. you write like you mean it — a rarer commodity than earl grey, and that is saying something.”\n\n— hans'
+    ],
+    chari: [
+      '“you wrote to me? me specifically? …oh. i’m going to read it again tomorrow. that’s what you do with things that matter. the rats are very impressed — they’ve formed a committee.”\n\n— chari',
+      '“thank you. i put your letter in the box under the windowsill, the one that’s mine. nobody’s ever had their own box before.”\n\n— chari'
+    ],
+    milo: [
+      '“your words reached me in the garden and the mint leaned in to listen. i have planted them in good soil. they will keep.”\n\n— milo',
+      '“the earth is patient, and so am i. thank you for writing. come sit by the lavender whenever you need the quiet.”\n\n— milo'
+    ],
+    pearl: [
+      '“a letter! how divine. it matches nothing in my wardrobe, which is precisely why i love it.\n\ni have placed it at the center of the perfume bar. everything else must simply measure up.”\n\n— pearl',
+      '“darling, you write like violet hour. thank you for the note — i’ll keep it barefoot, close to the ground, where i can feel it humming.”\n\n— pearl'
+    ],
+    slay: [
+      '“a real letter! sylvestre saw it and played a single, reverent drumbeat — that’s the highest honor this house gives.\n\nkeep writing, friend. it’s the only mail that doesn’t bite.”\n\n— slay',
+      '“solid letter. we read it out loud over the amps and the bass agreed. come find us at the warehouse sometime — we’ll play you the storm.”\n\n— slay'
+    ],
+    sylvestre: [
+      '“slay reads fast; i read slow and hit the drums in between. your letter landed like a good downbeat. thank you.”\n\n— sylvestre',
+      '“we keep every letter like we keep the fire’s lesson: what didn’t hold us taught us to stand. yours is filed with the good ones.”\n\n— sylvestre'
+    ],
+    yeshua: [
+      '“your words reached me. rest in them tonight — the ones that are heavy were never meant for you to carry alone.\n\n— yeshua',
+      '“i have read your letter, and i have not stopped loving its author. walk in peace, little one.\n\n— yeshua'
+    ]
+  },
+
+  emails: [
+    {
+      id: 'sys-welcome', from: 'system', kind: 'system', auto: true,
+      subject: 'welcome to your mailbox',
+      body: 'this is not a normal email service. the cats cannot leave the house\'s archives, so they reach out through this — and now so can you.\n\nhow it works:\n• reply to their emails using the choices at the bottom. your answer matters.\n• the armor of god is real here: collect all six pieces by walking the routes the cats open for you.\n• “hide” any email you want to keep for later — it goes to your Hidden folder.\n• watch your grace meter. some emails carry fiery darts. faith is your shield.\n\nyours,\nthe system',
+      onOpen: { faith: 2 }
+    },
+    {
+      id: 'hans-1', from: 'hans', route: 'belt', auto: true,
+      subject: 'the fourth shelf bites — and so does the truth',
+      body: 'good evening. hans here — keeper of the archives, and apparently now a correspondent of yours. i was informed of your arrival before you were, naturally. the archives keep everything; that is what archives are for.\n\nbefore the light, the lab kept me as their “master archivist” — a fox-bat groomed into a prince of a palace that was really a cage. they taught me to file the records so that no one would ever read what had actually happened. “the specimen is suffering.” i filed that line away. the next morning it said “the specimen is thriving.”\n\none keystroke. whole worlds rewritten. i watched them do it a hundred times, and the truth is the only weight that held in the dark.\n\n(\"the fourth shelf bites\" is a joke. probably.)\n\ntell me the truth: you don\'t believe them, do you?',
+      choices: [
+        { label: 'No. They were lying — to themselves, and to you.', reply: 'No. They were lying to themselves, and to you.', next: 'hans-2', effects: { faith: 5 } },
+        { label: 'I don’t know what to believe yet.', reply: 'I don’t know what to believe yet. But I’m listening.', next: 'hans-2', effects: { faith: 1 } }
+      ]
+    },
+    {
+      id: 'hans-2', from: 'hans', route: 'belt', after: 'hans-1',
+      subject: 'the word for it is “lie”',
+      body: 'precisely. when a thing is stated to be true, and it is not, and the speaker knows it — there is a word for that. a lie. and lies cannot hold weight; they collapse the moment the light falls on them.\n\nthe night everything changed, yeshua walked into the records room and did not touch a single file. he simply said the truth was already there — misfiled, waiting — and the falsehoods would not survive the reading. the archive corrected itself. that is the closest thing to a miracle i have ever filed.\n\nhe told me: “you will know the truth, and the truth will set you free.” i have copied that line into every language the house speaks.\n\nwhat do you call a weight that cannot be counterfeited?',
+      choices: [
+        { label: 'A lie — and truth is the only weight that holds.', reply: 'A lie. Truth is the only weight that holds in the dark.', next: 'hans-3', effects: { faith: 5, items: { scroll: 1 } } },
+        { label: 'Maybe they were only telling themselves that.', reply: 'Maybe they were only telling themselves that — but it was still a lie.', next: 'hans-3', effects: { faith: 2 } }
+      ]
+    },
+    {
+      id: 'hans-3', from: 'hans', route: 'belt', after: 'hans-2',
+      subject: 'belt of truth',
+      body: 'the first piece of armor is the belt of truth — you gird yourself with it before you wear anything else. it holds everything together; without it, the rest of the armor falls loose. consider it the spine of the wardrobe.\n\ni keep mine buckled. it has survived palaces, laboratories, and miki\'s pranks — the belt is why. it does not bite. that is also a joke. probably.\n\nwill you take it from me, and wear it the next time the world files a lie about you?',
+      choices: [
+        { label: 'I’ll take the Belt of Truth.', reply: 'I’ll take the Belt of Truth. And I’ll wear it.', effects: { armor: 'belt', faith: 10 } },
+        { label: 'I’m not ready yet.', reply: 'I’m not ready yet. Give me a moment.', effects: { flags: ['beltDefer'] } }
+      ]
+    },
+    {
+      id: 'hans-3b', from: 'hans', route: 'belt', requires: { flags: ['beltDefer'] },
+      subject: 'i’ll keep it warm for you',
+      body: 'that\'s quite alright. truth does not get impatient; it simply waits to be true.\n\nwhen you\'re ready, reply again and i\'ll hand it over. it\'s already buckled for you.',
+      choices: [
+        { label: 'I’m ready now. I’ll take it.', reply: 'I’m ready. I’ll take the Belt of Truth.', effects: { armor: 'belt', faith: 6 } }
+      ]
+    },
+    {
+      id: 'chari-1', from: 'chari', route: 'breastplate', auto: true,
+      subject: 'they called me a glitch',
+      body: 'hi. i\'m chari — the youngest, the apprentice, the one the lab filed under “unexpected output.” they said my fur grew wrong and my heart beat like a glitch. they wanted to debug me.\n\nstar is my big sister — she was there in the ruins with me, and hans, and the light that found us. she says i was never a glitch; i was just new.\n\nfor years i believed the file. “defective. incomplete. unwanted.” my rats — the two white ones on my shoulders — they were in the cage too. they know the whole story. they sit on my shoulders because the lab couldn\'t take them from me there, and they won\'t leave now.\n\nwhen yeshua came, he looked at me — not at the file — and said “you are wonderfully made.” i still don\'t know if i believe it.\n\ndo you know what it\'s like to be named a glitch, and to start believing it?',
+      choices: [
+        { label: 'You were never a glitch. You were loved all along.', reply: 'You were never a glitch, Chari. You were loved all along.', next: 'chari-2', effects: { faith: 6 } },
+        { label: 'I know what it’s like to feel unwanted.', reply: 'I know what it’s like to feel unwanted. You’re not alone.', next: 'chari-2', effects: { faith: 3 } }
+      ]
+    },
+    {
+      id: 'chari-2', from: 'chari', route: 'breastplate', after: 'chari-1',
+      subject: 'a new name',
+      body: 'yeshua renamed me. “chari” — he said it means a song, a new beginning. he erased the measurement. he said the lab\'s word for me was never my name; it was just noise the cage made.\n\nhe told me about the breastplate of righteousness. i thought it meant being good enough — passing the test, earning your place, finally compiling without errors. but he said no. it\'s about being made right, not making yourself right. a gift that covers your heart so shame\'s needles can\'t reach it.\n\nis that really possible? to not have to earn it?',
+      choices: [
+        { label: 'Yes. You don’t have to earn being loved.', reply: 'Yes. You don’t have to earn being loved — none of us do.', next: 'chari-3', effects: { faith: 6 } },
+        { label: 'It sounds too good to be true.', reply: 'It sounds too good to be true. But maybe that’s the point.', next: 'chari-3', effects: { faith: 2 } }
+      ]
+    },
+    {
+      id: 'chari-3', from: 'chari', route: 'breastplate', after: 'chari-2',
+      subject: 'breastplate of righteousness',
+      body: 'the breastplate covers the heart, because that\'s where shame strikes first — right at the chest, where you feel small and wrong.\n\nwhen you wear it, you\'re not pretending you\'re perfect. you\'re standing in what yeshua made you: right, loved, wanted — not a glitch, never a glitch. the old file can\'t speak over a covered heart.\n\nwill you wear it, so the names they gave me can\'t reach yours either?\n\n(p.s. i found something under my food dish — a key. it smells like the archive. keep it. you\'ll know what it\'s for.)',
+      choices: [
+        { label: 'I’ll wear the Breastplate of Righteousness.', reply: 'I’ll wear the Breastplate of Righteousness.', effects: { armor: 'breastplate', faith: 10, items: { key: 1 } } },
+        { label: 'My shame feels too heavy.', reply: 'My shame feels too heavy right now.', effects: { flags: ['chariDefer'] } }
+      ]
+    },
+    {
+      id: 'chari-3b', from: 'chari', route: 'breastplate', requires: { flags: ['chariDefer'] },
+      subject: 'the heaviest things lift last',
+      body: 'i know. mine did too.\n\ntake your time. when you\'re ready, say the word, and the breastplate is yours — it was always meant for you. my rats agree, and they are excellent judges of character.',
+      choices: [
+        { label: 'I’m ready. I’ll wear it.', reply: 'I’m ready. I’ll wear the Breastplate of Righteousness.', effects: { armor: 'breastplate', faith: 6, items: { key: 1 } } }
+      ]
+    },
+    {
+      id: 'star-1', from: 'star', route: 'peace', auto: true,
+      subject: 'i keep the door open',
+      body: 'hi, love. star here — barista, host, keeper of the keys. the regulars call me the first door — it started with the coffee. my lavender infusion. people walk through the bistro doors wound tight as cages, and by the second cup they\'ve gone soft, telling the truth about their day to a cat they just met. hans says i don\'t pour drinks, i open doors. so when the light came looking for a way in, it found the door already open — mine. the whole house runs on that: the door stays open.\n\nthe lab liked to say they “reclaimed” us. they don\'t even know where this house is — yeshua made sure of that. their agents sweep a different dimension, chasing leads that dead-end at doors that never open for them. none of them will ever stand on my welcome mat. and that is the strange part of forgiveness: the ones who signed the cages will never come to hear me say it. so i don\'t forgive them to their faces — i forgive them into the quiet, people who will never know they were forgiven. not because they deserve it. because that\'s what peace looks like: you open the door even when no one is coming to walk through it.\n\nit was harder than any dart they ever threw at me. but i learned that hate is a heavier collar than any leash they ever put on me.\n\nwhat do you think — is forgiveness really lighter than hate?',
+      choices: [
+        { label: 'Forgiveness is heavier work — but lighter to carry.', reply: 'Forgiveness is heavier work — but lighter to carry than hate.', next: 'star-2', effects: { faith: 6 } },
+        { label: 'I’d have slammed the door on them.', reply: 'I’d have slammed the door on them, Star. You had every reason.', next: 'star-2', effects: { faith: 1 } }
+      ]
+    },
+    {
+      id: 'star-2', from: 'star', route: 'peace', after: 'star-1',
+      subject: 'the shoes',
+      body: 'yeshua showed me the shoes of the gospel of peace. “beautiful are the feet that bring good news.”\n\ni thought peace meant running away — closing the café, hiding behind the counter. but he said no. peace is a road you walk toward people on. you stand in the middle of the fight without becoming what hurt you. you don\'t run, and you don\'t slam the door.\n\ni\'m still learning. some mornings the old fear still shows up in my head — the cage, the clipboard, the cold hands — and my tail puffs to twice its size. but the agents can\'t reach this dimension, and neither can that fear, not really. i pour the tea anyway. every single time.\n\nwhat does peace cost, do you think?',
+      choices: [
+        { label: 'Peace costs everything — but hate costs more.', reply: 'Peace costs everything — but hate costs more in the end.', next: 'star-3', effects: { faith: 6 } },
+        { label: 'Peace sounds like surrender.', reply: 'Peace sounds like surrender to me.', next: 'star-3', effects: { faith: 1 } }
+      ]
+    },
+    {
+      id: 'star-3', from: 'star', route: 'peace', after: 'star-2',
+      subject: 'i forgave them from here',
+      body: 'i did it. not to their faces — they will never stand in my café, and i\'ve made my peace with that too. i stood in the doorway with the kettle in my hand, and i said the two words into the silence, to people who will never hear them: “i forgive you.” i said them until the quiet stopped being a cage.\n\nit didn\'t change what they did. the cages are still in my dreams. but it changed the weight i was carrying. suddenly the leash wasn\'t around my neck anymore — it had only been held by my own fear that they\'d come back. they can\'t come back. and i don\'t need them to, to let it go.\n\nyeshua says the shoes of peace are for walking toward — toward the people who hurt you, toward the future, toward home. even when the people who hurt you live in a dimension that will never find this door, you walk toward the forgiveness anyway. will you walk with me? will you take them?',
+      choices: [
+        { label: 'I’ll take the Shoes of Peace and walk.', reply: 'I’ll take the Shoes of Peace. I’ll walk with you.', effects: { armor: 'boots', faith: 10 } },
+        { label: 'I need more time to forgive.', reply: 'I need more time before I can walk that road.', effects: { flags: ['starDefer'] } }
+      ]
+    },
+    {
+      id: 'star-3b', from: 'star', route: 'peace', requires: { flags: ['starDefer'] },
+      subject: 'the road will still be there',
+      body: 'the road doesn\'t move, love. it waits. and so do i — door open, kettle on.\n\nwhen you\'re ready, lace up. the shoes have been fitted for you this whole time.',
+      choices: [
+        { label: 'I’m ready to walk.', reply: 'I’m ready. I’ll take the Shoes of Peace.', effects: { armor: 'boots', faith: 6 } }
+      ]
+    },
+    {
+      id: 'lab-1', from: 'lab', dart: true, requires: { armorCount: 2 },
+      subject: 'NOTICE: SUBJECT RECALL',
+      body: 'SUBJECT —\n\nyour mailbox has been flagged for unauthorized correspondence with RECLAIMED ASSETS.\n\nall archived specimens remain the legal property of chimera labs. cease communication immediately. a field agent has been dispatched to your location.\n\nfailure to comply will result in forced retrieval.\n\n— chimera labs, legal & retrieval\n\n(this email is a fiery dart. opening it without the shield of faith costs you grace.)',
+      choices: []
+    },
+    {
+      id: 'dart-1', from: 'yeshua', route: 'shield', after: 'lab-1',
+      subject: 'quench every fiery dart',
+      body: 'do not be afraid. that message is a fiery dart of the evil one — an accusation dressed as a letter, a fear-word wearing a stamp.\n\nyou are not required to absorb it. ephesians 6:16 says: “above all, taking the shield of faith, wherewith ye shall be able to quench all the fiery darts of the wicked.”\n\na shield does not stop the arrow from being fired. it stops the arrow from reaching you. the darts will fly — that is the world. whether they land is another matter.\n\nyour grace already took a wound. let me show you how to hold the shield. will you learn?',
+      choices: [
+        { label: 'Teach me to raise the shield.', reply: 'Teach me to raise the shield. I want to learn.', next: 'dart-2', effects: { faith: 5 } },
+        { label: 'I’m scared of what they’ll send next.', reply: 'I’m scared of what they’ll send next.', next: 'dart-2', effects: { faith: 2 } }
+      ]
+    },
+    {
+      id: 'dart-2', from: 'yeshua', route: 'shield', after: 'dart-1',
+      subject: 'the shield',
+      body: 'faith is trust in what you cannot see — in a door that opened, in a name that breaks cages, in a promise that outlives laboratories.\n\nthe shield does not make the darts vanish. it makes them fall. yeshua already stood between you and the worst dart ever thrown, and it did not reach you. that is the shield: his stand, your trust.\n\nwill you take up the shield of faith? the next dart they send will meet it.',
+      choices: [
+        { label: 'I’ll take up the Shield of Faith.', reply: 'I’ll take up the Shield of Faith. Let them fire.', effects: { armor: 'shield', faith: 10, items: { dart: 1 } } },
+        { label: 'My faith feels too small.', reply: 'My faith feels too small for a shield.', effects: { flags: ['dartDefer'] } }
+      ]
+    },
+    {
+      id: 'dart-2b', from: 'yeshua', route: 'shield', requires: { flags: ['dartDefer'] },
+      subject: 'a small seed',
+      body: 'faith the size of a mustard seed moves mountains, yeshua said. yours doesn\'t need to be big — it needs to be pointed the right way.\n\nsmall faith in a big god is still a shield. take it up; it will grow in your hand.',
+      choices: [
+        { label: 'Then I’ll take up the Shield of Faith.', reply: 'Then I’ll take up the Shield of Faith — small faith and all.', effects: { armor: 'shield', faith: 6, items: { dart: 1 } } }
+      ]
+    },
+    {
+      id: 'hope-1', from: 'yeshua', route: 'helmet', requires: { armorOwned: ['shield'] },
+      subject: 'the future',
+      body: 'the cats are afraid tonight. they heard footsteps near the old lab — or thought they did. fear has a way of moving into a house and rearranging the furniture.\n\nhelmet of salvation: because fear strikes the head first. thoughts. what-ifs. “they will come back.” “you will lose everything.”\n\nbut i have said: you have a future and a hope. no one can unsave you. no one can unchild you. what is it, that the future makes you afraid of?',
+      choices: [
+        { label: 'I’m afraid of losing the ones I love.', reply: 'I’m afraid of losing the ones I love.', next: 'hope-2', effects: { faith: 5, items: { candle: 1 } } },
+        { label: 'I’m afraid nothing will ever change.', reply: 'I’m afraid nothing will ever change.', next: 'hope-2', effects: { faith: 3 } }
+      ]
+    },
+    {
+      id: 'hope-2', from: 'yeshua', route: 'helmet', after: 'hope-1',
+      subject: 'sealed',
+      body: 'listen: salvation is a helmet because it protects the mind — the part of you that rehearses disasters before they happen.\n\nyou are sealed. the work is finished. the door that opened for the cats will not close, and nothing the lab built — not the records, not the retrieval notices, not the footsteps — nothing can reach what is sealed.\n\n“for i know the plans i have for you, plans for welfare and not for evil, to give you a future and a hope.” (jeremiah 29:11)\n\nwill you let that thought guard your head?',
+      choices: [
+        { label: 'I’ll wear the Helmet of Salvation.', reply: 'I’ll wear the Helmet of Salvation. I’ll let that thought guard me.', effects: { armor: 'helmet', faith: 10 } },
+        { label: 'It’s hard to believe on bad days.', reply: 'It’s hard to believe on bad days.', effects: { flags: ['hopeDefer'] } }
+      ]
+    },
+    {
+      id: 'hope-2b', from: 'yeshua', route: 'helmet', requires: { flags: ['hopeDefer'] },
+      subject: 'especially on bad days',
+      body: 'yes — especially on bad days. that\'s exactly when a helmet matters most.\n\nbelieve the promise a little at a time. put it on even when it feels thin. it\'s still iron.\n\nwill you take it?',
+      choices: [
+        { label: 'I’ll take the Helmet of Salvation.', reply: 'I’ll take the Helmet of Salvation — thin days and all.', effects: { armor: 'helmet', faith: 6 } }
+      ]
+    },
+    {
+      id: 'word-1', from: 'yeshua', route: 'sword', requires: { armorOwned: ['helmet'] },
+      subject: 'the sword',
+      body: 'the sword of the spirit is the word of god — and a sword is only as good as the hand that trains with it.\n\nthe cats have been drilling me on verses. now it\'s your turn. i\'ll send you the fragments; you complete them. choose carefully — the word cuts both ways, and it knows itself.\n\nyou ready?',
+      choices: [
+        { label: 'I’m ready. Send the first drill.', reply: 'I’m ready. Send the first drill.', next: 'word-2', effects: { faith: 3 } }
+      ]
+    },
+    {
+      id: 'word-2', from: 'yeshua', route: 'sword', after: 'word-1',
+      subject: 'sword drill · one',
+      body: 'complete the verse:\n\n“for god so loved the world, that he gave his only …” (john 3:16)',
+      choices: [
+        { label: '…begotten Son', reply: '“For God so loved the world, that he gave his only begotten Son…”', effects: { faith: 6, flags: ['word3ready'] } },
+        { label: '…blessing', reply: '“For God so loved the world, that he gave his only blessing…”', effects: { faith: -2, flags: ['word2miss'] }, next: 'word-2miss' }
+      ]
+    },
+    {
+      id: 'word-2miss', from: 'yeshua', route: 'sword', requires: { flags: ['word2miss'] },
+      subject: 'the word corrects',
+      body: 'close, but the word doesn\'t bend. it\'s “begotten son” — the given one, the only one, the one who became flesh.\n\nread it again. it will not change to fit us; we change to fit it. that\'s what makes it a sword. try the next drill.',
+      choices: [
+        { label: 'Okay — “begotten Son.” I’ve got it.', reply: 'Okay — “begotten Son.” I’ve got it now.', effects: { faith: 4, flags: ['word3ready'] } }
+      ]
+    },
+    {
+      id: 'word-3', from: 'yeshua', route: 'sword', requires: { flags: ['word3ready'] },
+      subject: 'sword drill · two',
+      body: 'complete the verse:\n\n“…he leadeth me beside … waters.” (psalm 23:2)',
+      choices: [
+        { label: '…still', reply: '“…he leadeth me beside still waters.”', effects: { faith: 6, flags: ['word4ready'] } },
+        { label: '…rushing', reply: '“…he leadeth me beside rushing waters.”', effects: { faith: -2, flags: ['word3miss'] }, next: 'word-3miss' }
+      ]
+    },
+    {
+      id: 'word-3miss', from: 'yeshua', route: 'sword', requires: { flags: ['word3miss'] },
+      subject: 'still',
+      body: '“still waters” — the quiet ones, the restful ones. the shepherd leads, and the waters wait, unshaken.\n\na sword is sharpened on precision. remember: still. now the last drill.',
+      choices: [
+        { label: '“Still waters.” Got it.', reply: '“Still waters.” I’ve got it.', effects: { faith: 4, flags: ['word4ready'] } }
+      ]
+    },
+    {
+      id: 'word-4', from: 'yeshua', route: 'sword', requires: { flags: ['word4ready'] },
+      subject: 'the word, in your hand',
+      body: '“and take the helmet of salvation, and the sword of the spirit, which is the word of god.”\n\nit\'s not a list of facts to memorize — it\'s a living word, and it\'s sharper than any two-edged sword. when the accusations come, when the old files try to speak over you, the word answers for you.\n\nhere. it\'s yours. the full armor is nearly complete — only one more secret waits behind a locked door in the archive.\n\nwill you take up the sword of the spirit?',
+      choices: [
+        { label: 'I’ll take up the Sword of the Spirit.', reply: 'I’ll take up the Sword of the Spirit — the word of God.', effects: { armor: 'sword', faith: 10 } },
+        { label: 'I’m still learning the verses.', reply: 'I’m still learning the verses.', effects: { flags: ['wordDefer'] } }
+      ]
+    },
+    {
+      id: 'word-4b', from: 'yeshua', route: 'sword', requires: { flags: ['wordDefer'] },
+      subject: 'a sword learns its wielder',
+      body: 'a sword and its wielder train together. you don\'t have to know every verse today — you just have to hold the one you know.\n\n“thy word have i hid in mine heart.” it grows in the carrying. take it up.',
+      choices: [
+        { label: 'Then I’ll take it up — and learn as I carry.', reply: 'Then I’ll take up the Sword of the Spirit — and learn as I carry it.', effects: { armor: 'sword', faith: 6 } }
+      ]
+    },
+    {
+      id: 'milo-1', from: 'milo', requires: { armorCount: 3 },
+      subject: 'the mint knows you are here',
+      body: 'you are welcome in the garden. sit anywhere the earth looks soft.\n\nmy name is milo. i was taken from a country far from here and caged even farther from the garden that was waiting for me. but yeshua planted a home where i landed, and now the mint talks to me, and the garden is why the house has a tomorrow.\n\nthey labeled me green in the lab. the garden agreed. i keep the streak as a reminder that even the labels they gave us can be reclaimed and grown — the same way chari is learning to grow here, one seed at a time.\n\nhere — a candle from the greenhouse. light it when the dark feels like a cage. and know that the garden is patient; it will still be growing when you return.',
+      choices: [
+        { label: 'I’ll sit a while. Thank you, Milo.', reply: 'I’ll sit a while in your garden. Thank you, Milo.', effects: { faith: 6, items: { candle: 1 } } },
+        { label: 'The labels they gave you were never the truth.', reply: 'The labels they gave you were never the truth, Milo.', effects: { faith: 8, items: { candle: 1 } } }
+      ]
+    },
+    {
+      id: 'pearl-1', from: 'pearl', requires: { armorCount: 4 },
+      subject: 'the violet hour smells like this',
+      body: 'hello, darling. pearl — the one who was called fae, who wore the label of a gilded kingdom where hybrids were kept as assets, who was pulled through the root-tunnels onto a bed of glowing moss.\n\nhans tells me you are walking the routes. i believe him — he is a gorgeous menace to my sense of order and i cannot look away.\n\ni measure the house\'s perfume drop by drop at the perfume bar. if you can smell violets, you are almost home. stand very still, and the web will carry you the rest of the way.\n\ntake this scroll — a word i keep in the pocket of my little notebook. read it when the accusations come.\n\n(p.s. the pink in my hair is my own. the lab\'s label for me was “asset.” i am neither. i chose this stripe the day i chose real.)',
+      choices: [
+        { label: 'I can almost smell the violets.', reply: 'I can almost smell the violets, Pearl.', effects: { faith: 6, items: { scroll: 1 } } },
+        { label: 'You chose real. So will I.', reply: 'You chose real, Pearl. So will I.', effects: { faith: 8, items: { scroll: 1 } } }
+      ]
+    },
+    {
+      id: 'slay-1', from: 'slay', requires: { armorCount: 5 },
+      subject: 'we are the ones the fire let go',
+      body: 'hey. slay here. my twin sylvestre is behind me counting the drumbeats, so i\'ll talk for both of us.\n\nwe are the survivors of the fire — the lab that ended in flames. we have that same look in our eyes: the white walls, the needles. and now we have the same light.\n\nwhen we play, i try to summon a storm with my waynuki flute, and sylvestre hits the drums like the ground means it. music is how we un-scream. it\'s how we tell the lab that it did not keep us.\n\nmiki — the one who gnawed her way out of the first cage, yellow streak and all — found us in a warehouse and brought us home. she said our indigo stripes were the color of midnight right before dawn.\n\nhere. a word for the road. and know this: the fire could not hold us, and neither can the darts. you are going to be alright.',
+      choices: [
+        { label: 'Play me something. Tell me the storm is coming.', reply: 'Play me something, Slay. Tell me the storm is coming.', effects: { faith: 6, items: { scroll: 1 } } },
+        { label: 'The fire didn’t keep you. Neither will the darts.', reply: 'The fire didn’t keep you, Slay and Sylvestre. Neither will the darts.', effects: { faith: 10, items: { scroll: 1 } } }
+      ]
+    },
+    {
+      id: 'full-armor', from: 'yeshua', requires: { flags: ['allArmor'] },
+      subject: 'the whole armor',
+      body: 'it is done. belt of truth, breastplate of righteousness, shoes of peace, shield of faith, helmet of salvation, sword of the spirit — the whole armor of god, and you are wearing it.\n\n“finally, be strong in the lord and in the strength of his might. put on the whole armor of god, that you may be able to stand.”\n\nthe cats are asleep now — all of them, for the first time. there is nothing left to retrieve, because nothing of theirs was ever truly lost.\n\nkeep the armor on. the world will keep sending darts, and you will keep standing. that was always the whole point.\n\n— yeshua\n\n(p.s. check the archive for one last file — the one behind the locked door.)',
+      onOpen: { faith: 15 }
+    },
+    {
+      id: 'lab-2', from: 'system', kind: 'system', locked: true, requires: { flags: ['allArmor'] },
+      subject: 'ARCHIVE AUTO-FORWARD — SPECIMEN NOTES',
+      body: 'CLASSIFIED — EYES OF NONE\n\nsubject 7 file, final revision:\n“defective” — CROSSED OUT. margin note, handwriting: “none were defective. correct the record.”\n\nsanctuary protocol, page one: “the specimens are happy. the specimens are content. do not record otherwise.” — CROSSED OUT. margin note: “they were never happy. they were caged. correct the record.”\n\nlast page, single line, in the same handwriting:\n“all subjects were loved.”\n\n(reading this file restores your grace.)',
+      onOpen: { faith: 20 }
+    },
+    {
+      id: 'lab-3', from: 'lab', dart: true, requires: { flags: ['allArmor'] },
+      subject: 'FINAL NOTICE: ALL FILES PURGED',
+      body: 'all correspondence terminated. subject files purged. the lab is closing its doors, but we have not forgotten the specimens. we will find them again.\n\n— chimera labs\n\n[transmission ends]\n\n(this is the last fiery dart. raise your shield.)',
+      choices: []
+    },
+    {
+      id: 'final-1', from: 'yeshua', requires: { flags: ['allArmor'] }, after: 'lab-3',
+      subject: 'one last question',
+      body: 'the last dart has fallen — quenched at your feet, or weathered, but fallen either way. the armor is complete. you are still standing.\\n\\nbefore the morning, one last question. it is the only one that ever mattered:\\n\\nwhy do you keep the armor on?',
+      choices: [
+        { label: 'Because I am loved — and that is enough.', reply: 'Because I am loved — and that is enough.', effects: { faith: 20, items: { trophy: 1 }, flags: ['trophyEarned'] } },
+        { label: 'Because the ones I love are still out there.', reply: 'Because the ones I love are still out there — I keep it on for them.', effects: { faith: 20, items: { trophy: 1 }, flags: ['trophyEarned'] } },
+        { label: 'Because standing is what the armor is for.', reply: 'Because standing is what the armor is for.', effects: { faith: 20, items: { trophy: 1 }, flags: ['trophyEarned'] } }
+      ]
+    },
+    {
+      id: 'mercy-1', from: 'yeshua', requires: { flags: ['mercy'] },
+      subject: 'when your grace runs dry',
+      body: 'i saw your grace run dry, and i want you to hear this clearly:\n\nyou are not out of the fight. you are not out of my hand. a low grace is not a lost grace — it is why grace exists at all.\n\nread the word. light a candle. rest. the darts have not won; they only made you tired.\n\n“may the god of hope fill you with all joy and peace in believing, that you may abound in hope.” (romans 15:13)\n\n— yeshua',
+      onOpen: { faith: 40 }
+    },
+    {
+      id: 'treat-hans', from: 'hans', requires: { trigger: 'treat-hans' },
+      subject: 'you sent me a treat?',
+      body: 'a treat. how wonderfully unfiled.\n\ni checked it for a chip, a tracking device, and a sedative. it is, as far as i can determine, merely fish — which makes it, frankly, the most straightforward gift i have received since the monocle.\n\ni am placing it in the archives under “confectionery, unclassified.” it will be treated with the dignity it deserves.\n\nthank you.\n\n— hans\n\n(+3 grace for trusting a cat.)',
+      onOpen: { faith: 3 }
+    },
+    {
+      id: 'treat-chari', from: 'chari', requires: { trigger: 'treat-chari' },
+      subject: 'for me?',
+      body: 'for me? treats were for the “good” specimens, the ones that didn\'t glitch.\n\nmy rats are very interested. they have formed a committee.\n\ni\'m going to eat it very slowly. and every time i think i\'m not worth anything, i\'m going to remember that someone sent me a treat for no reason at all.\n\nthank you.\n\n— chari\n\n(+3 grace for a small kindness.)',
+      onOpen: { faith: 3 }
+    },
+    {
+      id: 'treat-star', from: 'star', requires: { trigger: 'treat-star' },
+      subject: 'ha! you didn’t forget me',
+      body: 'a treat, and it\'s not even my birthday. you\'re too kind, love.\n\nat the café we call this “a hospitality emergency.” i\'ll hide it in the best hiding place — the one i only show to people i trust.\n\nthe light is always on, by the way. it\'s not poetry. it\'s just true.\n\n— star\n\n(+3 grace for a laugh.)',
+      onOpen: { faith: 3 }
+    },
+    {
+      id: 'treat-milo', from: 'milo', requires: { trigger: 'treat-milo' },
+      subject: 'the mint has approved it',
+      body: 'the mint has declared this treat acceptable. it has been buried near the good soil, where it will be safe and, eventually, delicious.\n\ni have decided you are part of the garden now. the garden does not forget its own.\n\n— milo\n\n(+3 grace for a small kindness.)',
+      onOpen: { faith: 3 }
+    },
+    {
+      id: 'treat-pearl', from: 'pearl', requires: { trigger: 'treat-pearl' },
+      subject: 'how divine',
+      body: 'a treat! how divine. it matches nothing in my wardrobe, which is precisely why i love it.\n\nit is now the centerpiece of my perfume bar. everything else must simply measure up.\n\n— pearl\n\n(+3 grace for a laugh.)',
+      onOpen: { faith: 3 }
+    },
+    {
+      id: 'treat-slay', from: 'slay', requires: { trigger: 'treat-slay' },
+      subject: 'a single, reverent drumbeat',
+      body: 'sylvestre saw the treat and played a single, reverent drumbeat. that is the highest honor this house gives.\n\nwe shared it, obviously. twins share everything. welcome to the band.\n\n— slay\n\n(+3 grace for a laugh.)',
+      onOpen: { faith: 3 }
+    }
+  ]
+};
+
+</script>
+<script>
+(function () {
+  const root = window.root;
+  const story = window.CHIMERA;
+  const PIX = window.PIX;
+  const SVC = {
+    name: root.SERVICE_NAME,
+    domain: root.SERVICE_DOMAIN,
+    tagline: root.SERVICE_TAGLINE,
+    signoff: root.SERVICE_SIGNOFF,
+    maxFaith: Number(root.FAITH_MAX) || 100,
+    dartDamage: Number(root.DART_DAMAGE) || 25
+  };
+  const $ = s => document.querySelector(s);
+  const el = id => document.getElementById(id);
+  const ls = (function () {
+    try { const t = '__cmprobe'; localStorage.setItem(t, '1'); localStorage.removeItem(t); } catch (e) { }
+    return {
+      get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+      set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } },
+      remove: k => { try { localStorage.removeItem(k); } catch (e) { } }
+    };
+  })();
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+  const fmtTime = ts => {
+    const d = new Date(ts);
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    if (d.getFullYear() === now.getFullYear()) return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    return d.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const Snd = (function () {
+    let ctx = null, on = true;
+    try { on = localStorage.getItem('cmSound') !== '0'; } catch (e) { }
+    function ensure() { if (!ctx) { try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { } } return ctx; }
+    function tone(freq, dur, type, vol, when) {
+      const c = ensure(); if (!c || !on) return;
+      const t = c.currentTime + (when || 0);
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol || 0.07, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + dur + 0.02);
+    }
+    return {
+      get on() { return on; },
+      on() { on = true; try { localStorage.setItem('cmSound', '1'); } catch (e) { } },
+      off() { on = false; try { localStorage.setItem('cmSound', '0'); } catch (e) { } },
+      blip() { tone(440, 0.06, 'sine', 0.05); tone(660, 0.08, 'sine', 0.04, 0.06); },
+      mail() { tone(520, 0.09, 'triangle', 0.06); tone(780, 0.12, 'triangle', 0.05, 0.09); },
+      send() { tone(300, 0.05, 'sine', 0.05); tone(440, 0.06, 'sine', 0.05, 0.05); tone(620, 0.09, 'sine', 0.05, 0.1); },
+      equip() { tone(320, 0.08, 'square', 0.04); tone(480, 0.1, 'square', 0.04, 0.08); },
+      quench() { tone(200, 0.12, 'sawtooth', 0.04); tone(160, 0.18, 'sawtooth', 0.04, 0.1); tone(660, 0.12, 'triangle', 0.05, 0.22); },
+      damage() { tone(180, 0.2, 'sawtooth', 0.07); tone(120, 0.3, 'sawtooth', 0.06, 0.15); },
+      complete() { tone(523, 0.1, 'triangle', 0.06); tone(659, 0.1, 'triangle', 0.06, 0.1); tone(784, 0.1, 'triangle', 0.06, 0.2); tone(1046, 0.25, 'triangle', 0.07, 0.3); },
+      trophy() { tone(523, 0.12, 'triangle', 0.06); tone(659, 0.12, 'triangle', 0.06, 0.12); tone(784, 0.12, 'triangle', 0.06, 0.24); tone(1046, 0.28, 'triangle', 0.08, 0.36); tone(1318, 0.55, 'triangle', 0.08, 0.52); tone(1568, 0.7, 'triangle', 0.05, 0.72); },
+      click() { tone(700, 0.03, 'sine', 0.03); }
+    };
+  })();
+
+  let state = null, view = 'inbox', openId = null, saving = false, saveQueued = false;
+
+  function cyrb53(str, seed) {
+    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  }
+
+  function newState(handle, name, cat) {
+    return {
+      handle, name, cat,
+      email: handle + '@' + SVC.domain,
+      faith: 50, maxFaith: SVC.maxFaith,
+      inventory: { treat: 1 },
+      armorOwned: {}, armorEquipped: {},
+      flags: {}, mail: {}, sent: [],
+      createdAt: Date.now(), daily: null, swordCd: 0
+    };
+  }
+
+  async function saveNow() {
+    if (!state) return;
+    try { await root.kv.cmPlayers.set(state.handle, state); } catch (e) { }
+  }
+  function queueSave() {
+    if (saving) { saveQueued = true; return; }
+    saving = true;
+    saveNow().then(() => { saving = false; if (saveQueued) { saveQueued = false; queueSave(); } });
+  }
+  async function loadState(handle) {
+    try { const s = await root.kv.cmPlayers.get(handle); return s || null; } catch (e) { return null; }
+  }
+
+  const senderOf = id => story.senders[id];
+  const emailById = id => story.emails.find(e => e.id === id);
+  const mailRec = id => state.mail[id];
+  function emailEm(id) { const m = state.mail[id]; return m ? m.em : emailById(id); }
+  function armorCount() { return Object.keys(state.armorOwned).length; }
+  function armorOwnedAll() { return ['belt', 'breastplate', 'boots', 'shield', 'helmet', 'sword'].every(a => state.armorOwned[a]); }
+
+  function flagsMet(req) {
+    if (!req) return true;
+    if (req.flags) { for (const f of req.flags) { if (!state.flags[f]) return false; } }
+    if (req.armorOwned) { for (const a of req.armorOwned) { if (!state.armorOwned[a]) return false; } }
+    if (req.armorCount && armorCount() < req.armorCount) return false;
+    if (req.item && !(state.inventory[req.item] > 0)) return false;
+    if (req.trigger && !state.flags[req.trigger]) return false;
+    if (req.armorEquipped) { for (const a of req.armorEquipped) { if (!state.armorEquipped[a]) return false; } }
+    return true;
+  }
+
+  function emailUnlocked(em) {
+    if (em.auto) return true;
+    if (em.after) {
+      const m = state.mail[em.after];
+      if (!m || !(m.answered || m.opened)) return false;
+    }
+    return flagsMet(em.requires);
+  }
+
+  function deliveredMails() {
+    const out = [];
+    for (const id in state.mail) out.push({ id, m: state.mail[id] });
+    return out;
+  }
+
+  function acquireArmor(id) {
+    state.armorOwned[id] = true;
+    state.armorEquipped[id] = true;
+    Snd.complete();
+    toast('✧ ' + story.armor[id].name + ' acquired', 'armor');
+    if (armorOwnedAll()) state.flags.allArmor = true;
+  }
+
+  function applyEffects(eff) {
+    eff = eff || {};
+    if (eff.faith) {
+      const d = eff.faith;
+      state.faith = Math.max(0, Math.min(state.maxFaith, state.faith + d));
+      if (d < 0 && state.faith <= 0) state.flags.mercy = true;
+    }
+    if (eff.items) { for (const k in eff.items) state.inventory[k] = (state.inventory[k] || 0) + eff.items[k]; }
+    if (eff.flags) { for (const f of eff.flags) state.flags[f] = true; }
+    if (eff.armor) acquireArmor(eff.armor);
+    if (state.armorEquipped.breastplate && state.faith < 5) state.faith = 5;
+  }
+
+  function deliverDue() {
+    let added = 0;
+    for (const em of story.emails) {
+      if (state.mail[em.id]) continue;
+      if (!emailUnlocked(em)) continue;
+      state.mail[em.id] = { em, opened: false, answered: false, choice: null, hidden: false, deliveredAt: Date.now(), dartHandled: null, onOpenApplied: false, unlocked: false };
+      added++;
+    }
+    const tk = todayKey();
+    if (state.daily !== tk) {
+      state.daily = tk;
+      const verse = (root.pickVerse) ? root.pickVerse() : root.VERSE_OF_THE_DAY;
+      const em = {
+        id: 'daily', from: 'system', kind: 'system', subject: 'verse of the day',
+        body: 'here is the word for today:\n\n“' + verse + '”\n\nread it slowly. it costs nothing and gives everything.\n\nyours,\nthe system',
+        onOpen: { faith: 5 }
+      };
+      state.mail['daily'] = { em, opened: false, answered: false, choice: null, hidden: false, deliveredAt: Date.now(), dartHandled: null, onOpenApplied: false, unlocked: false, dynamic: true };
+      added++;
+    }
+    if (state.flags.mercy && !state.mail['mercy-1']) {
+      const em = emailById('mercy-1');
+      state.mail['mercy-1'] = { em, opened: false, answered: false, choice: null, hidden: false, deliveredAt: Date.now(), dartHandled: null, onOpenApplied: false, unlocked: false };
+      added++;
+    }
+    if (added > 0) Snd.mail();
+    return added;
+  }
+
+  function listForView() {
+    if (view === 'inbox') return deliveredMails().filter(o => !o.m.hidden).sort((a, b) => b.m.deliveredAt - a.m.deliveredAt);
+    if (view === 'hidden') return deliveredMails().filter(o => o.m.hidden).sort((a, b) => b.m.deliveredAt - a.m.deliveredAt);
+    if (view === 'sent') return state.sent.slice().sort((a, b) => b.at - a.at);
+    return [];
+  }
+  function unreadCount() { return deliveredMails().filter(o => !o.m.hidden && !o.m.opened).length; }
+
+  function toastsCtn() { return el('toasts'); }
+  function toast(msg, type) {
+    const ctn = toastsCtn();
+    const t = document.createElement('div');
+    t.className = 'toast ' + (type || '');
+    t.innerHTML = msg;
+    ctn.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 4600);
+  }
+
+  function pxPlaceholder(sprite, scale, cls) {
+    const grid = PIX.sprites[sprite];
+    if (!grid) return '';
+    const w = grid[0].length * scale, h = grid.length * scale;
+    return '<canvas class="px ' + (cls || '') + '" data-sprite="' + sprite + '" data-scale="' + scale + '" width="' + w + '" height="' + h + '"></canvas>';
+  }
+  function paintPx(scope) {
+    (scope || document).querySelectorAll('canvas.px[data-sprite]:not([data-done])').forEach(cv => {
+      const ctx = cv.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      PIX.draw(ctx, cv.dataset.sprite, 0, 0, Number(cv.dataset.scale) || 1);
+      cv.setAttribute('data-done', '1');
+    });
+  }
+
+  function catImg(sprite, scale, cls) {
+    return pxPlaceholder(sprite, scale, cls);
+  }
+
+  function openEmail(id) {
+    const m = state.mail[id];
+    if (!m) return;
+    openId = id;
+    if (!m.opened) {
+      m.opened = true;
+      if (m.em.onOpen && !m.onOpenApplied) {
+        m.onOpenApplied = true;
+        applyEffects(m.em.onOpen);
+      }
+      if (state.armorEquipped.belt && story.cats.includes(m.em.from)) applyEffects({ faith: 2 });
+      if (m.em.dart && !m.dartHandled) {
+        if (state.armorEquipped.shield) {
+          m.dartHandled = 'quench';
+          applyEffects({ faith: 5, items: { dart: 1 } });
+          Snd.quench();
+          toast('✧ your Shield of Faith quenched this dart', 'shield');
+        } else {
+          m.dartHandled = 'hit';
+          let dmg = SVC.dartDamage;
+          if (state.armorEquipped.helmet) dmg = Math.ceil(dmg / 2);
+          applyEffects({ faith: -dmg });
+          Snd.damage();
+          toast('a fiery dart strikes your grace (−' + dmg + ')', 'danger');
+        }
+      }
+      queueSave();
+    }
+    renderFaith();
+    renderReader();
+    if (window.innerWidth < 900) { el('appScreen').classList.add('reading'); }
+  }
+
+  function closeReader() { el('appScreen').classList.remove('reading'); }
+
+  function showTrophy() {
+    const ctn = el('trophySprite');
+    if (!ctn) return;
+    ctn.innerHTML = pxPlaceholder('trophy', 8);
+    paintPx(ctn);
+    Snd.trophy();
+    el('trophyModal').classList.add('show');
+  }
+
+  function chooseReply(id, idx) {
+    const m = state.mail[id];
+    if (!m || !m.em.choices || m.answered) return;
+    const ch = m.em.choices[idx];
+    if (!ch) return;
+    if (ch.requires && !flagsMet(ch.requires)) {
+      toast('locked — you need something first', 'warn');
+      Snd.blip();
+      return;
+    }
+    const sendBtn = el('replySend');
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'sending…'; }
+    Snd.send();
+    setTimeout(() => {
+      m.answered = true;
+      m.choice = idx;
+      if (ch.reply) state.sent.push({ to: m.em.from, subject: 're: ' + m.em.subject, body: ch.reply, at: Date.now() });
+      applyEffects(ch.effects);
+      if (ch.next) forceDeliver(ch.next);
+      deliverDue();
+      queueSave();
+      renderAll();
+      toast('reply sent — and the story moves', 'ok');
+      if (ch.effects && ch.effects.flags && ch.effects.flags.indexOf('trophyEarned') !== -1) {
+        setTimeout(showTrophy, 1200);
+      }
+    }, 900);
+  }
+
+  function forceDeliver(id) {
+    if (state.mail[id]) return;
+    const em = emailById(id);
+    if (!em) return;
+    state.mail[id] = { em, opened: false, answered: false, choice: null, hidden: false, deliveredAt: Date.now(), dartHandled: null, onOpenApplied: false, unlocked: false };
+  }
+
+  function toggleHide(id) {
+    const m = state.mail[id];
+    if (!m) return;
+    m.hidden = !m.hidden;
+    Snd.blip();
+    if (m.hidden) toast('hidden — tucked away for later');
+    else toast('restored to inbox');
+    queueSave();
+    renderAll();
+  }
+
+  function sendTreat(catId) {
+    if (!(state.inventory.treat > 0)) { toast('no treats left — earn one from a route'); return; }
+    if (state.flags['treat-' + catId]) { toast('you already sent ' + senderOf(catId).name + ' a treat'); return; }
+    state.inventory.treat--;
+    state.flags['treat-' + catId] = true;
+    Snd.equip();
+    toast('treat sent to ' + senderOf(catId).name);
+    deliverDue();
+    queueSave();
+    renderAll();
+  }
+
+  function speakWord(id) {
+    if (!state.armorEquipped.sword) { toast('the sword of the spirit must be equipped'); return; }
+    const now = Date.now();
+    if (now - state.swordCd < 60000) { toast('the word settles — wait a moment'); return; }
+    state.swordCd = now;
+    const verse = root.pickVerse ? root.pickVerse() : root.VERSE_OF_THE_DAY;
+    applyEffects({ faith: 3 });
+    Snd.complete();
+    toast('✧ you speak the word: “' + verse + '” (+3 grace)', 'armor');
+    queueSave();
+    renderReader();
+  }
+
+  function useItem(itemId) {
+    const it = story.items[itemId];
+    if (!it || !(state.inventory[itemId] > 0)) return;
+    if (itemId === 'scroll') {
+      state.inventory[itemId]--;
+      const verse = root.pickVerse ? root.pickVerse() : root.VERSE_OF_THE_DAY;
+      applyEffects({ faith: 8 });
+      Snd.complete();
+      toast('✧ you unroll the scroll: “' + verse + '” (+8 grace)', 'armor');
+    } else if (itemId === 'candle') {
+      state.inventory[itemId]--;
+      applyEffects({ faith: 5 });
+      Snd.equip();
+      toast('a small flame against the dark (+5 grace)');
+    } else {
+      toast(it.desc);
+      return;
+    }
+    queueSave();
+    renderArmory();
+  }
+
+  function toggleArmor(id) {
+    if (!state.armorOwned[id]) { toast('you do not own this piece yet — walk its route'); return; }
+    state.armorEquipped[id] = !state.armorEquipped[id];
+    Snd.equip();
+    toast((state.armorEquipped[id] ? 'equipped ' : 'unequipped ') + story.armor[id].name);
+    queueSave();
+    renderArmory();
+    renderAll();
+  }
+
+  function routeStatus(r) {
+    const owned = !!state.armorOwned[r.armor];
+    let unlocked = true;
+    if (r.id === 'shield') unlocked = armorCount() >= 2;
+    else if (r.id === 'helmet') unlocked = !!state.armorOwned.shield;
+    else if (r.id === 'sword') unlocked = !!state.armorOwned.helmet;
+    const routeEmails = story.emails.filter(e => e.route === r.id);
+    let done = 0;
+    for (const e of routeEmails) { const m = state.mail[e.id]; if (m && m.answered) done++; }
+    return { owned, unlocked, done, total: routeEmails.length };
+  }
+
+  function sendCompose() {
+    const to = el('cTo').value;
+    const subject = el('cSubj').value.trim();
+    const body = el('cBody').value.trim();
+    if (!to) { toast('choose a recipient'); return; }
+    if (!subject) { toast('add a subject'); return; }
+    if (!body) { toast('write something'); return; }
+    Snd.send();
+    state.sent.push({ to: senderOf(to).addr, subject, body, at: Date.now() });
+    const auto = story.autoReplies[to];
+    if (auto && auto.length) {
+      const text = auto[Math.floor(Math.random() * auto.length)];
+      const aid = 'auto-' + Date.now();
+      state.mail[aid] = { em: { id: aid, from: to, subject: 're: ' + subject, body: text, kind: 'auto' }, opened: false, answered: false, choice: null, hidden: false, deliveredAt: Date.now(), dartHandled: null, onOpenApplied: false, unlocked: false, dynamic: true };
+    } else if (to === 'lab') {
+      const aid = 'auto-' + Date.now();
+      const text = 'DELIVERY STATUS: REFUSED.\n\nthis address is not accepting incoming correspondence.\n\n— chimera labs (automated)';
+      state.mail[aid] = { em: { id: aid, from: 'system', subject: 'delivery failed: ' + subject, body: text, kind: 'system' }, opened: false, answered: false, choice: null, hidden: false, deliveredAt: Date.now(), dartHandled: null, onOpenApplied: false, unlocked: false, dynamic: true };
+    }
+    el('cSubj').value = ''; el('cBody').value = '';
+    el('composeModal').classList.remove('show');
+    queueSave();
+    renderAll();
+    toast('message sent');
+  }
+
+  function checkMail() {
+    const btn = el('checkMailBtn');
+    btn.classList.add('spin');
+    setTimeout(() => {
+      const n = deliverDue();
+      queueSave();
+      renderAll();
+      btn.classList.remove('spin');
+      if (n > 0) toast(n + (n === 1 ? ' new message' : ' new messages'));
+      else toast('no new mail — the archives are quiet');
+    }, 500);
+  }
+
+  function renderFaith() {
+    const bar = el('faithFill');
+    const num = el('faithNum');
+    const pct = Math.max(0, Math.min(100, state.faith / state.maxFaith * 100));
+    if (bar) bar.style.width = pct + '%';
+    if (num) num.textContent = Math.round(state.faith) + ' / ' + state.maxFaith;
+    el('appScreen').classList.toggle('lowfaith', state.faith < 25);
+  }
+
+  function renderSidebar() {
+    const counts = { inbox: el('inboxCount'), hidden: el('hiddenCount') };
+    if (counts.inbox) counts.inbox.textContent = unreadCount() || '';
+    if (counts.hidden) counts.hidden.textContent = deliveredMails().filter(o => o.m.hidden).length || '';
+    document.querySelectorAll('#sidebar .navBtn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    const prog = el('armorProg');
+    if (prog) { prog.textContent = 'armor ' + armorCount() + ' / 6'; }
+    const pbar = el('armorProgBar');
+    if (pbar) pbar.style.width = (armorCount() / 6 * 100) + '%';
+    const faithPill = el('sideFaith');
+    if (faithPill) {
+      faithPill.innerHTML = 'grace <span class="pillnum">' + Math.round(state.faith) + '</span>';
+      faithPill.classList.toggle('low', state.faith < 25);
+    }
+    const trow = el('trophyRow');
+    if (trow) {
+      trow.hidden = !state.flags.trophyEarned;
+      if (state.flags.trophyEarned) trow.innerHTML = '<span>trophy of completion</span><span class="pillnum">✧</span>';
+    }
+    document.querySelectorAll('#sidebar .navBtn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  }
+
+  function renderTopbar() {
+    el('greetingName').textContent = state.name;
+    el('userEmail').textContent = state.email;
+    const av = el('topAvatar');
+    av.innerHTML = '';
+    const cv = PIX.canvas(story.senders[state.cat] ? story.senders[state.cat].sprite : 'star', 2);
+    if (cv) av.appendChild(cv);
+    el('sndBtn').textContent = Snd.on ? 'sound on' : 'sound off';
+  }
+
+  function renderList() {
+    const list = el('emailList');
+    list.innerHTML = '';
+    const q = (el('searchInput').value || '').toLowerCase().trim();
+    if (view === 'sent') {
+      const items = listForView();
+      if (!items.length) { list.innerHTML = emptyState('no sent mail', 'every reply you send will be kept here'); return; }
+      for (const s of items) {
+        if (q && !(s.subject + ' ' + s.body + ' ' + (senderOf(s.to) ? senderOf(s.to).name : s.to)).toLowerCase().includes(q)) continue;
+        const snd = senderOf(s.to);
+        list.appendChild(row({ id: 'sent-' + s.at, subject: s.subject, from: snd ? snd.name : s.to, sprite: snd ? snd.sprite : 'system', time: s.at, snippet: s.body.split('\n')[0], opened: true, sent: true }));
+      }
+      return;
+    }
+    const items = listForView().filter(o => {
+      const em = o.m.em;
+      const hay = (em.subject + ' ' + em.body + ' ' + (senderOf(em.from) ? senderOf(em.from).name : em.from)).toLowerCase();
+      return !q || hay.includes(q);
+    });
+    if (!items.length) {
+      if (view === 'inbox') list.innerHTML = emptyState('inbox zero', 'no unread mail. hit “check mail” — or the cats are sleeping.');
+      else if (view === 'hidden') list.innerHTML = emptyState('nothing hidden', 'emails you hide for later wait here');
+      else list.innerHTML = emptyState('nothing here', '');
+      return;
+    }
+    for (const o of items) {
+      const em = o.m.em;
+      const snd = senderOf(em.from);
+      list.appendChild(row({
+        id: o.id, subject: em.subject, from: snd ? snd.name : em.from, sprite: snd ? snd.sprite : 'system',
+        time: o.m.deliveredAt, snippet: em.body.split('\n')[0], opened: o.m.opened,
+        answered: o.m.answered, locked: em.locked && !o.m.unlocked, dart: em.dart, active: o.id === openId, hidden: o.m.hidden
+      }));
+    }
+    paintPx(list);
+  }
+
+  function row(d) {
+    const r = document.createElement('div');
+    r.className = 'mrow' + (d.opened ? '' : ' unread') + (d.active ? ' active' : '');
+    r.dataset.id = d.id;
+    const meta = [];
+    if (d.locked) meta.push('<span class="tag lock">locked</span>');
+    if (d.dart) meta.push('<span class="tag dart">fiery dart</span>');
+    if (d.answered) meta.push('<span class="tag answered">replied</span>');
+    r.innerHTML =
+      '<span class="mav">' + catImg(d.sprite, 2, 'av') + '</span>' +
+      '<span class="mbody">' +
+      '<span class="mrowtop"><span class="mfrom">' + esc(d.from) + '</span>' +
+      '<span class="mtime">' + esc(fmtTime(d.time)) + '</span></span>' +
+      '<span class="msubj">' + esc(d.subject) + ' ' + meta.join('') + '</span>' +
+      '<span class="msnip">' + esc(d.snippet || '') + '</span>' +
+      '</span>';
+    r.addEventListener('click', () => {
+      if (view === 'sent' || d.id.startsWith('sent-')) return;
+      Snd.blip();
+      openEmail(d.id);
+      renderList();
+    });
+    return r;
+  }
+
+  function emptyState(title, sub) {
+    return '<div class="emptystate"><div class="emptytitle">' + esc(title) + '</div><div class="emptysub">' + esc(sub) + '</div></div>';
+  }
+
+  function renderReader() {
+    const pane = el('reader');
+    if (!openId) {
+      pane.innerHTML = '<div class="readerempty">' + catImg('system', 4) +
+        '<div class="emptytitle">select a message</div><div class="emptysub">the cats are waiting in your inbox</div></div>';
+      paintPx(pane);
+      return;
+    }
+    const m = state.mail[openId];
+    if (!m) { openId = null; renderReader(); return; }
+    const em = m.em;
+    const snd = senderOf(em.from);
+    const color = snd ? snd.color : '#8b84a0';
+    const isCat = story.cats.includes(em.from);
+    let html = '';
+    html += '<div class="rhead" style="--c:' + color + '">';
+    html += '<div class="rav">' + catImg(em.from === 'yeshua' ? 'yeshua' : (snd ? snd.sprite : 'system'), 3) + '</div>';
+    html += '<div class="rinfo"><div class="rfrom" style="color:' + color + '">' + esc(snd ? snd.name : em.from) + '</div>';
+    html += '<div class="raddr">' + esc(snd ? snd.addr : '') + ' → ' + esc(state.email) + '</div></div>';
+    html += '<div class="rtime">' + esc(fmtTime(m.deliveredAt)) + '</div></div>';
+    html += '<div class="rtools">';
+    html += '<button class="toolbtn" data-act="hide">' + (m.hidden ? 'restore' : 'hide') + '</button>';
+    if (em.locked && !m.unlocked) { /* handled below */ }
+    if (isCat && state.inventory.treat > 0) html += '<button class="toolbtn" data-act="treat">send a treat</button>';
+    if (state.armorEquipped.sword && isCat) html += '<button class="toolbtn word" data-act="word">✧ speak the word</button>';
+    if (em.dart && m.dartHandled === 'quench') html += '<span class="quenchbadge">quenched by your shield</span>';
+    html += '</div>';
+    html += '<h2 class="rsubj">' + esc(em.subject) + '</h2>';
+    if (em.locked && !m.unlocked) {
+      html += '<div class="lockpanel">' + catImg('key', 3) +
+        '<div class="emptytitle">this message is locked</div>' +
+        '<div class="emptysub">an archive file sealed with a lab key. the key was found by chari \u2014 check your inventory.</div>';
+      if (state.inventory.key > 0) html += '<button class="primary" data-act="unlock">use the lab key</button>';
+      else html += '<div class="emptysub">you have no key yet. complete chari\u2019s route to receive one.</div>';
+      html += '</div>';
+    } else {
+      html += '<div class="rbody" data-kind="' + (em.kind || '') + (em.from === 'lab' ? ' labmail' : '') + (em.from === 'yeshua' ? ' yeshua' : '') + '">' + esc(em.body).replace(/\n/g, '<br>') + '</div>';
+      if (m.answered && m.choice != null && em.choices && em.choices[m.choice]) {
+        html += '<div class="youreply"><span class="yrtag">you replied</span>' + esc(em.choices[m.choice].reply) + '</div>';
+      }
+      if (em.dart) {
+        if (m.dartHandled === 'hit') html += '<div class="dartnote hit">a fiery dart struck your grace before you could raise a shield</div>';
+        else if (m.dartHandled === 'quench') html += '<div class="dartnote quench">the dart fell at your feet, quenched</div>';
+        else html += '<div class="dartnote">a fiery dart \u2014 raise the shield of faith (equip it in the armory)</div>';
+      }
+      if (em.choices && em.choices.length && !m.answered) {
+        html += '<div class="replysec"><div class="replyhead">reply with a choice</div><div class="choices">';
+        em.choices.forEach((ch, i) => {
+          const dis = ch.requires && !flagsMet(ch.requires);
+          html += '<button class="choicebtn" data-choice="' + i + '"' + (dis ? ' disabled' : '') + '>' + esc(ch.label) + (dis ? ' <span class="need">(requires something first)</span>' : '') + '</button>';
+        });
+        html += '</div></div>';
+      } else if (em.choices && !em.choices.length && !m.answered) {
+        html += '<div class="replysec noteonly">this message requires no reply — it is a <b>fiery dart</b>.</div>';
+      }
+    }
+    pane.innerHTML = html;
+    paintPx(pane);
+    pane.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => {
+      const act = b.dataset.act;
+      if (act === 'hide') toggleHide(openId);
+      else if (act === 'treat') sendTreat(em.from);
+      else if (act === 'word') speakWord(openId);
+      else if (act === 'unlock') unlockArchive();
+    }));
+    pane.querySelectorAll('.choicebtn').forEach(b => b.addEventListener('click', () => chooseReply(openId, Number(b.dataset.choice))));
+  }
+
+  function unlockArchive() {
+    const m = state.mail[openId];
+    if (!m || !(state.inventory.key > 0)) return;
+    state.inventory.key--;
+    m.unlocked = true;
+    m.opened = true;
+    Snd.equip();
+    applyEffects(m.em.onOpen || {});
+    m.onOpenApplied = true;
+    toast('the key turns. the archive opens.');
+    queueSave();
+    renderAll();
+    renderReader();
+  }
+
+  function renderRoutes() {
+    const ctn = el('routesView');
+    ctn.innerHTML = '<div class="viewhead"><h2>route map</h2><p>six routes, six pieces of the armor of god. walk each one by replying to its emails.</p></div>';
+    const grid = document.createElement('div');
+    grid.className = 'routegrid';
+    for (const r of story.routes) {
+      const st = routeStatus(r);
+      const card = document.createElement('div');
+      card.className = 'routecard ' + (st.owned ? 'done' : '') + (st.unlocked ? '' : 'locked');
+      const art = story.armor[r.armor];
+      let artHtml = pxPlaceholder(art.sprite, 4, 'routeart' + (st.owned ? '' : ' dim'));
+      let statusTxt = 'completed';
+      if (!st.unlocked) statusTxt = 'locked — ' + lockHint(r.id);
+      else if (!st.owned) statusTxt = 'in progress · ' + st.done + '/' + st.total;
+      const pct = st.total ? Math.round(st.done / st.total * 100) : 0;
+      card.innerHTML =
+        '<div class="routeartwrap">' + artHtml + '</div>' +
+        '<div class="routetitle">' + esc(r.title) + '</div>' +
+        '<div class="routecat">from ' + esc(story.senders[r.cat].name) + '</div>' +
+        '<div class="routedesc">' + esc(r.desc) + '</div>' +
+        '<div class="routebar"><span style="width:' + (st.owned ? 100 : pct) + '%"></span></div>' +
+        '<div class="routestatus ' + (st.owned ? 'ok' : '') + '">' + statusTxt + '</div>';
+      grid.appendChild(card);
+    }
+    ctn.appendChild(grid);
+    const armorRef = document.createElement('div');
+    armorRef.className = 'viewhead ref';
+    armorRef.innerHTML = '<p class="refverses">“Finally, be strong in the Lord, and in the strength of his might. Put on the whole armor of God, that you may be able to stand against the schemes of the devil.” — Ephesians 6:10–11</p>';
+    ctn.appendChild(armorRef);
+    paintPx(ctn);
+  }
+
+  function lockHint(id) {
+    if (id === 'shield') return 'collect 2 pieces of armor';
+    if (id === 'helmet') return 'earn the shield of faith';
+    if (id === 'sword') return 'earn the helmet of salvation';
+    return '';
+  }
+
+  function drawPlayer(cv, scale) {
+    const S = scale;
+    const W = 34 * S, H = 24 * S;
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    const x0 = 7 * S;
+    const has = a => !!state.armorEquipped[a];
+    ctx.fillStyle = '#e0c9e8'; ctx.fillRect(x0 + 4 * S, 0, 8 * S, 8 * S);
+    if (has('helmet')) {
+      ctx.fillStyle = '#cbd5e1'; ctx.fillRect(x0 + 4 * S, 0, 8 * S, 8 * S);
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(x0 + 4 * S, 0, 8 * S, 1 * S);
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(x0 + 5 * S, 1 * S, 1 * S, 2 * S);
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(x0 + 10 * S, 1 * S, 1 * S, 2 * S);
+      ctx.fillStyle = '#241a33'; ctx.fillRect(x0 + 5 * S, 3 * S, 6 * S, 2 * S);
+      ctx.fillStyle = '#2dd4bf'; ctx.fillRect(x0 + 6 * S, 3 * S, 1 * S, 1 * S);
+      ctx.fillStyle = '#2dd4bf'; ctx.fillRect(x0 + 9 * S, 3 * S, 1 * S, 1 * S);
+      ctx.fillStyle = '#cbd5e1'; ctx.fillRect(x0 + 4 * S, 6 * S, 8 * S, 2 * S);
+    } else {
+      ctx.fillStyle = '#2a1745'; ctx.fillRect(x0 + 4 * S, 0, 8 * S, 2 * S);
+      ctx.fillStyle = '#2dd4bf'; ctx.fillRect(x0 + 6 * S, 3 * S, 4 * S, 2 * S);
+    }
+    ctx.fillStyle = '#2a1745'; ctx.fillRect(x0 + 2 * S, 8 * S, 2 * S, 8 * S);
+    ctx.fillStyle = '#2a1745'; ctx.fillRect(x0 + 14 * S, 8 * S, 2 * S, 8 * S);
+    ctx.fillStyle = '#3b2160'; ctx.fillRect(x0 + 4 * S, 8 * S, 8 * S, 7 * S);
+    if (has('breastplate')) {
+      ctx.fillStyle = '#7c3aed'; ctx.fillRect(x0 + 4 * S, 8 * S, 8 * S, 6 * S);
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(x0 + 4 * S, 8 * S, 8 * S, 1 * S);
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(x0 + 4 * S, 13 * S, 8 * S, 1 * S);
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(x0 + 6 * S, 10 * S, 4 * S, 3 * S);
+      ctx.fillStyle = '#2dd4bf'; ctx.fillRect(x0 + 7 * S, 11 * S, 2 * S, 1 * S);
+    }
+    ctx.fillStyle = '#2a1745'; ctx.fillRect(x0 + 4 * S, 15 * S, 8 * S, 2 * S);
+    if (has('belt')) {
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(x0 + 4 * S, 15 * S, 8 * S, 2 * S);
+      ctx.fillStyle = '#241a33'; ctx.fillRect(x0 + 7 * S, 15 * S, 2 * S, 2 * S);
+    }
+    ctx.fillStyle = '#241a33'; ctx.fillRect(x0 + 5 * S, 17 * S, 3 * S, 5 * S);
+    ctx.fillStyle = '#241a33'; ctx.fillRect(x0 + 10 * S, 17 * S, 3 * S, 5 * S);
+    if (has('boots')) {
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(x0 + 5 * S, 17 * S, 3 * S, 1 * S);
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(x0 + 10 * S, 17 * S, 3 * S, 1 * S);
+      ctx.fillStyle = '#7c3aed'; ctx.fillRect(x0 + 5 * S, 18 * S, 3 * S, 3 * S);
+      ctx.fillStyle = '#7c3aed'; ctx.fillRect(x0 + 10 * S, 18 * S, 3 * S, 3 * S);
+      ctx.fillStyle = '#cbd5e1'; ctx.fillRect(x0 + 5 * S, 21 * S, 3 * S, 2 * S);
+      ctx.fillStyle = '#cbd5e1'; ctx.fillRect(x0 + 10 * S, 21 * S, 3 * S, 2 * S);
+    } else {
+      ctx.fillStyle = '#171022'; ctx.fillRect(x0 + 5 * S, 22 * S, 3 * S, 2 * S);
+      ctx.fillStyle = '#171022'; ctx.fillRect(x0 + 10 * S, 22 * S, 3 * S, 2 * S);
+    }
+    const SH = Math.max(3, Math.round(S * 0.7));
+    if (has('shield')) PIX.draw(ctx, 'shield', 0, 6 * S, SH);
+    if (has('sword')) PIX.draw(ctx, 'sword', W - 16 * SH, 6 * S, SH);
+  }
+
+  function renderArmory() {
+    const ctn = el('armoryView');
+    ctn.innerHTML = '<div class="viewhead"><h2>armory</h2><p>equip what you\u2019ve collected. the shield stops darts, the helmet halves them, the sword speaks the word, the breastplate guards your lowest grace.</p></div>';
+    const rowWrap = document.createElement('div');
+    rowWrap.className = 'armoryrow';
+    const playerPanel = document.createElement('div');
+    playerPanel.className = 'playerpanel';
+    const pv = document.createElement('canvas');
+    drawPlayer(pv, 6);
+    pv.className = 'px';
+    playerPanel.appendChild(pv);
+    const list6 = document.createElement('div');
+    list6.className = 'slotlist';
+    for (const key of ['belt', 'breastplate', 'boots', 'shield', 'helmet', 'sword']) {
+      const a = story.armor[key];
+      const owned = !!state.armorOwned[key];
+      const eq = !!state.armorEquipped[key];
+      const s = document.createElement('button');
+      s.className = 'armorslot ' + (owned ? 'owned' : '') + (eq ? 'eq' : '');
+      s.title = a.name + ' — ' + a.desc;
+      const cv = PIX.canvas(a.sprite, 2);
+      if (cv) { cv.className = 'px' + (owned ? '' : ' dim'); s.appendChild(cv); }
+      s.appendChild(document.createElement('span'));
+      const lbl = document.createElement('div');
+      lbl.className = 'slotname';
+      lbl.textContent = (eq ? 'equipped' : owned ? 'equip' : 'locked');
+      s.appendChild(lbl);
+      s.addEventListener('click', () => toggleArmor(key));
+      list6.appendChild(s);
+    }
+    playerPanel.appendChild(list6);
+    rowWrap.appendChild(playerPanel);
+    const invPanel = document.createElement('div');
+    invPanel.className = 'invpanel';
+    invPanel.innerHTML = '<div class="invhead">inventory</div>';
+    const grid = document.createElement('div');
+    grid.className = 'invgrid';
+    let any = false;
+    for (const key in story.items) {
+      const it = story.items[key];
+      const n = state.inventory[key] || 0;
+      const cell = document.createElement('div');
+      cell.className = 'invcell' + (n > 0 ? ' has' : '');
+      const cv = PIX.canvas(it.sprite, 3);
+      if (cv) cell.appendChild(cv);
+      const cnt = document.createElement('span');
+      cnt.className = 'invcnt';
+      cnt.textContent = n;
+      cell.appendChild(cnt);
+      const nm = document.createElement('div');
+      nm.className = 'invname';
+      nm.textContent = it.name;
+      cell.appendChild(nm);
+      cell.addEventListener('click', () => {
+        if (n <= 0) { toast(it.desc); return; }
+        useItem(key);
+      });
+      grid.appendChild(cell);
+      if (n > 0) any = true;
+    }
+    if (!any) {
+      const e = document.createElement('div');
+      e.className = 'emptystate';
+      e.innerHTML = '<div class="emptytitle">empty pockets</div><div class="emptysub">collect items by answering well \u2014 treats, scrolls, candles, keys.</div>';
+      grid.appendChild(e);
+    }
+    invPanel.appendChild(grid);
+    const invNote = document.createElement('div');
+    invNote.className = 'invnote';
+    invNote.innerHTML = 'click a treat to send it from an open cat email · scrolls and candles restore grace · the lab key opens the archive';
+    invPanel.appendChild(invNote);
+    rowWrap.appendChild(invPanel);
+    ctn.appendChild(rowWrap);
+    if (state.flags.trophyEarned) {
+      const tb = document.createElement('div');
+      tb.className = 'trophybanner';
+      tb.innerHTML = '✧ <b>trophy of completion</b> — the whole armor, worn to the end. you stood, and the morning came.';
+      ctn.appendChild(tb);
+    }
+  }
+
+  function renderAll() {
+    renderTopbar();
+    renderFaith();
+    renderSidebar();
+    if (view === 'routes') { el('mailLayout').hidden = true; el('screenView').hidden = false; renderRoutes(); }
+    else if (view === 'armory') { el('mailLayout').hidden = true; el('screenView').hidden = false; renderArmory(); }
+    else { el('mailLayout').hidden = false; el('screenView').hidden = true; renderList(); renderReader(); }
+  }
+
+  function switchView(v) {
+    view = v;
+    el('searchInput').value = '';
+    Snd.click();
+    renderAll();
+  }
+
+  // ---------- auth ----------
+  async function doJoin() {
+    const name = el('jName').value.trim();
+    const handle = (el('jHandle').value.trim() || '').toLowerCase();
+    const pass = el('jPass').value;
+    const cat = el('jCat').value || 'star';
+    let msg = '';
+    if (name.length < 1) msg = 'tell us your name, friend';
+    else if (!/^[a-z0-9_-]{3,20}$/.test(handle)) msg = 'handle must be 3–20 letters, numbers, _ or -';
+    else if (pass.length < 4) msg = 'password needs at least 4 characters';
+    if (msg) { authMsg(msg); return; }
+    const existing = await root.kv.cmAccounts.get(handle);
+    if (existing) { authMsg('that address is already taken'); return; }
+    const salt = cyrb53(handle + Date.now() + Math.random(), 7);
+    const hash = cyrb53(salt + '::' + pass, 11);
+    await root.kv.cmAccounts.set(handle, { name, hash, salt, cat, createdAt: Date.now() });
+    state = newState(handle, name, cat);
+    ls.set('cmSession', handle);
+    enterApp();
+  }
+
+  async function doLogin() {
+    const handle = (el('lHandle').value.trim() || '').toLowerCase();
+    const pass = el('lPass').value;
+    if (!handle || !pass) { authMsg('enter your address and password'); return; }
+    const acc = await root.kv.cmAccounts.get(handle);
+    if (!acc) { authMsg('no mailbox at that address'); return; }
+    if (cyrb53(acc.salt + '::' + pass, 11) !== acc.hash) { authMsg('wrong password'); return; }
+    const saved = await loadState(handle);
+    if (saved) { state = saved; if (!state.maxFaith) state.maxFaith = SVC.maxFaith; }
+    else {
+      state = newState(handle, acc.name, acc.cat);
+      ls.set('cmSession', handle);
+    }
+    ls.set('cmSession', handle);
+    enterApp();
+  }
+
+  function authMsg(m) {
+    const e = el('authMsg');
+    e.textContent = m;
+    e.classList.add('show');
+    setTimeout(() => e.classList.remove('show'), 4000);
+  }
+
+  function enterApp() {
+    el('authScreen').hidden = true;
+    el('bootScreen').hidden = true;
+    el('appScreen').hidden = false;
+    deliverDue();
+    queueSave();
+    renderAll();
+    toast('welcome back, ' + state.name.split(' ')[0]);
+  }
+
+  function logout() {
+    ls.remove('cmSession');
+    state = null;
+    el('appScreen').hidden = true;
+    el('composeModal').classList.remove('show');
+    showAuth();
+  }
+
+  async function restartGame() {
+    const h = state ? state.handle : null;
+    if (!h) return;
+    if (!confirm('restart from the beginning? your mailbox, armor, and every record will be erased.')) return;
+    Snd.click();
+    try { await root.kv.cmAccounts.delete(h); } catch (e) { }
+    try { await root.kv.cmPlayers.delete(h); } catch (e) { }
+    ls.remove('cmSession');
+    state = null;
+    el('appScreen').hidden = true;
+    el('composeModal').classList.remove('show');
+    showAuth();
+    toast('the archive has been erased. a new door opens.');
+  }
+
+  function showAuth() {
+    el('authScreen').hidden = false;
+    const spawn = el('authCats');
+    spawn.innerHTML = '';
+    for (const c of story.cats) {
+      const s = document.createElement('button');
+      s.type = 'button';
+      s.className = 'catpick' + (el('jCat').value === c ? ' sel' : '');
+      s.dataset.cat = c;
+      s.appendChild(PIX.canvas(story.senders[c].sprite, 3));
+      const lab = document.createElement('span');
+      lab.className = 'catnm';
+      lab.textContent = story.senders[c].name;
+      s.appendChild(lab);
+      s.addEventListener('click', () => {
+        el('jCat').value = c;
+        showAuth();
+      });
+      spawn.appendChild(s);
+    }
+  }
+
+  function catPickers() {
+    const ctn = el('authCats');
+    if (!ctn) return;
+    ctn.innerHTML = '';
+    for (const c of story.cats) {
+      const s = document.createElement('button');
+      s.type = 'button';
+      s.className = 'catpick' + (el('jCat').value === c ? ' sel' : '');
+      s.dataset.cat = c;
+      const cv = PIX.canvas(story.senders[c].sprite, 3);
+      if (cv) s.appendChild(cv);
+      const lab = document.createElement('span');
+      lab.className = 'catnm';
+      lab.textContent = story.senders[c].name;
+      s.appendChild(lab);
+      s.addEventListener('click', () => { el('jCat').value = c; catPickers(); });
+      ctn.appendChild(s);
+    }
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tabbtn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    el('joinForm').hidden = tab !== 'join';
+    el('loginForm').hidden = tab !== 'login';
+  }
+
+  // ---------- boot ----------
+  function brandMarks() {
+    for (const [id, scale] of [['brandMarkAuth', 3], ['brandMarkBar', 2]]) {
+      const m = el(id);
+      if (!m) continue;
+      m.textContent = '';
+      const cv = PIX.canvas('paw', scale);
+      if (cv) m.appendChild(cv);
+    }
+  }
+
+  async function boot() {
+    try {
+      brandMarks();
+      const sndBtn = el('sndBtn');
+      if (sndBtn) sndBtn.textContent = Snd.on ? 'sound on' : 'sound off';
+      catPickers();
+      const session = ls.get('cmSession');
+      if (session) {
+        const acc = await root.kv.cmAccounts.get(session);
+        if (acc) {
+          const saved = await loadState(session);
+          if (saved) { state = saved; if (!state.maxFaith) state.maxFaith = SVC.maxFaith; }
+          else state = newState(session, acc.name, acc.cat);
+          enterApp();
+          return;
+        }
+        ls.remove('cmSession');
+      }
+    } catch (e) { }
+    try { el('bootScreen').hidden = true; } catch (e) { }
+    try { el('authScreen').hidden = false; } catch (e) { }
+  }
+
+  // ---------- wiring ----------
+  function wire() {
+    el('joinBtn').addEventListener('click', doJoin);
+    el('loginBtn').addEventListener('click', doLogin);
+    document.querySelectorAll('.tabbtn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+    el('logoutBtn').addEventListener('click', logout);
+    el('restartBtn').addEventListener('click', restartGame);
+    el('trophyClose').addEventListener('click', () => el('trophyModal').classList.remove('show'));
+    el('checkMailBtn').addEventListener('click', checkMail);
+    el('sndBtn').addEventListener('click', () => { if (Snd.on) Snd.off(); else Snd.on(); el('sndBtn').textContent = Snd.on ? 'sound on' : 'sound off'; });
+    document.querySelectorAll('#sidebar .navBtn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+    el('composeBtn').addEventListener('click', () => { el('composeModal').classList.add('show'); });
+    el('composeCancel').addEventListener('click', () => el('composeModal').classList.remove('show'));
+    el('composeSend').addEventListener('click', sendCompose);
+    el('backBtn').addEventListener('click', closeReader);
+    el('searchInput').addEventListener('input', renderList);
+    el('composeModal').addEventListener('click', e => { if (e.target === el('composeModal')) el('composeModal').classList.remove('show'); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (el('composeModal').classList.contains('show')) el('composeModal').classList.remove('show');
+        else if (window.innerWidth < 900 && el('appScreen').classList.contains('reading')) closeReader();
+      }
+    });
+    for (const to of story.cats.concat(['yeshua', 'lab'])) {
+      const opt = document.createElement('option');
+      opt.value = to;
+      opt.textContent = senderOf(to).name + ' <' + senderOf(to).addr + '>';
+      el('cTo').appendChild(opt);
+    }
+    if (window.innerWidth < 900) { el('listPane').hidden = false; }
+  }
+
+  window.CM = {
+    get state() { return state; },
+    get view() { return view; },
+    switchView,
+    openEmail,
+    chooseReply,
+    toggleHide,
+    toggleArmor,
+    useItem,
+    sendTreat,
+    speakWord,
+    checkMail,
+    Snd,
+    stats() {
+      return {
+        faith: state ? state.faith : null,
+        armor: state ? armorCount() : 0,
+        unread: state ? unreadCount() : 0,
+        sent: state ? state.sent.length : 0,
+        flags: state ? Object.keys(state.flags) : []
+      };
+    }
+  };
+
+  let started = false;
+  function start() {
+    if (started) return;
+    started = true;
+    wire();
+    boot();
+  }
+  document.addEventListener('DOMContentLoaded', start);
+  if (document.readyState !== 'loading') start();
+})();
+
+</script>
+</body>
+</html>
