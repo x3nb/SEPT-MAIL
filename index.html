@@ -51,6 +51,7 @@
   }
   .px { image-rendering: pixelated; image-rendering: crisp-edges; }
   .dim { opacity: .22; filter: grayscale(.7); }
+  [hidden] { display: none !important; }
   .screen { position: relative; z-index: 1; min-height: 100vh; }
 
   button { font-family: inherit; cursor: pointer; }
@@ -72,6 +73,7 @@
 
   #bootScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
   .boottext { color: var(--muted); font-family: var(--serif); font-style: italic; letter-spacing: 1px; }
+  .noscriptbanner { max-width: 440px; padding: 14px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.55; text-align: left; }
 
   #authScreen { display: flex; align-items: center; justify-content: center; padding: 30px 16px; }
   #authDeco { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
@@ -404,6 +406,9 @@
 
 <div id="bootScreen" class="screen">
   <div class="boottext">opening the mailbox…</div>
+  <noscript>
+    <div class="noscriptbanner">This is an interactive game and needs JavaScript to run. Enable JavaScript, or download the file and open it directly in a browser (Chrome / Firefox / Safari) to play. If you're reading this on GitHub, use the <b>Preview</b> button or deploy it to GitHub Pages.</div>
+  </noscript>
 </div>
 
 <div id="authScreen" class="screen" hidden>
@@ -1483,6 +1488,7 @@ window.CHIMERA = {
       remove: k => { try { localStorage.removeItem(k); } catch (e) { } }
     };
   })();
+  try { el('bootScreen').hidden = true; el('authScreen').hidden = false; } catch (e) { }
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
   const fmtTime = ts => {
