@@ -51,6 +51,7 @@
   }
   .px { image-rendering: pixelated; image-rendering: crisp-edges; }
   .dim { opacity: .22; filter: grayscale(.7); }
+  [hidden] { display: none !important; }
   .screen { position: relative; z-index: 1; min-height: 100vh; }
 
   button { font-family: inherit; cursor: pointer; }
@@ -72,6 +73,7 @@
 
   #bootScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
   .boottext { color: var(--muted); font-family: var(--serif); font-style: italic; letter-spacing: 1px; }
+  .noscriptbanner { max-width: 440px; padding: 14px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.55; text-align: left; }
 
   #authScreen { display: flex; align-items: center; justify-content: center; padding: 30px 16px; }
   #authDeco { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
@@ -404,6 +406,9 @@
 
 <div id="bootScreen" class="screen">
   <div class="boottext">opening the mailbox…</div>
+  <noscript>
+    <div class="noscriptbanner">This is an interactive game and needs JavaScript to run. Enable JavaScript, or download the file and open it directly in a browser (Chrome / Firefox / Safari) to play. If you're reading this on GitHub, use the <b>Preview</b> button or deploy it to GitHub Pages.</div>
+  </noscript>
 </div>
 
 <div id="authScreen" class="screen" hidden>
@@ -1475,6 +1480,15 @@ window.CHIMERA = {
   };
   const $ = s => document.querySelector(s);
   const el = id => document.getElementById(id);
+  const ls = (function () {
+    try { const t = '__cmprobe'; localStorage.setItem(t, '1'); localStorage.removeItem(t); } catch (e) { }
+    return {
+      get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+      set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } },
+      remove: k => { try { localStorage.removeItem(k); } catch (e) { } }
+    };
+  })();
+  try { el('bootScreen').hidden = true; el('authScreen').hidden = false; } catch (e) { }
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
   const fmtTime = ts => {
@@ -2269,7 +2283,7 @@ window.CHIMERA = {
     const hash = cyrb53(salt + '::' + pass, 11);
     await root.kv.cmAccounts.set(handle, { name, hash, salt, cat, createdAt: Date.now() });
     state = newState(handle, name, cat);
-    localStorage.setItem('cmSession', handle);
+    ls.set('cmSession', handle);
     enterApp();
   }
 
@@ -2284,9 +2298,9 @@ window.CHIMERA = {
     if (saved) { state = saved; if (!state.maxFaith) state.maxFaith = SVC.maxFaith; }
     else {
       state = newState(handle, acc.name, acc.cat);
-      localStorage.setItem('cmSession', handle);
+      ls.set('cmSession', handle);
     }
-    localStorage.setItem('cmSession', handle);
+    ls.set('cmSession', handle);
     enterApp();
   }
 
@@ -2308,7 +2322,7 @@ window.CHIMERA = {
   }
 
   function logout() {
-    localStorage.removeItem('cmSession');
+    ls.remove('cmSession');
     state = null;
     el('appScreen').hidden = true;
     el('composeModal').classList.remove('show');
@@ -2322,7 +2336,7 @@ window.CHIMERA = {
     Snd.click();
     try { await root.kv.cmAccounts.delete(h); } catch (e) { }
     try { await root.kv.cmPlayers.delete(h); } catch (e) { }
-    localStorage.removeItem('cmSession');
+    ls.remove('cmSession');
     state = null;
     el('appScreen').hidden = true;
     el('composeModal').classList.remove('show');
@@ -2390,24 +2404,26 @@ window.CHIMERA = {
   }
 
   async function boot() {
-    brandMarks();
-    const sndBtn = el('sndBtn');
-    if (sndBtn) sndBtn.textContent = Snd.on ? 'sound on' : 'sound off';
-    catPickers();
-    const session = localStorage.getItem('cmSession');
-    if (session) {
-      const acc = await root.kv.cmAccounts.get(session);
-      if (acc) {
-        const saved = await loadState(session);
-        if (saved) { state = saved; if (!state.maxFaith) state.maxFaith = SVC.maxFaith; }
-        else state = newState(session, acc.name, acc.cat);
-        enterApp();
-        return;
+    try {
+      brandMarks();
+      const sndBtn = el('sndBtn');
+      if (sndBtn) sndBtn.textContent = Snd.on ? 'sound on' : 'sound off';
+      catPickers();
+      const session = ls.get('cmSession');
+      if (session) {
+        const acc = await root.kv.cmAccounts.get(session);
+        if (acc) {
+          const saved = await loadState(session);
+          if (saved) { state = saved; if (!state.maxFaith) state.maxFaith = SVC.maxFaith; }
+          else state = newState(session, acc.name, acc.cat);
+          enterApp();
+          return;
+        }
+        ls.remove('cmSession');
       }
-      localStorage.removeItem('cmSession');
-    }
-    el('bootScreen').hidden = true;
-    el('authScreen').hidden = false;
+    } catch (e) { }
+    try { el('bootScreen').hidden = true; } catch (e) { }
+    try { el('authScreen').hidden = false; } catch (e) { }
   }
 
   // ---------- wiring ----------
